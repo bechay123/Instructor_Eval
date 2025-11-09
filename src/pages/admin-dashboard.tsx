@@ -710,11 +710,12 @@ export default function AdminDashboard() {
           onValueChange={setActiveTab}
           className="space-y-6"
         >
-          <TabsList className="bg-white border-[#344F1F]/20">
+          <TabsList className="bg-white border-[#344F1F]/20 flex-wrap h-auto gap-2 p-2">
             <TabsTrigger
               value="overview"
               currentValue={activeTab}
               onValueChange={setActiveTab}
+              className="text-xs sm:text-sm"
             >
               Overview
             </TabsTrigger>
@@ -722,11 +723,12 @@ export default function AdminDashboard() {
               value="pending"
               currentValue={activeTab}
               onValueChange={setActiveTab}
-              className="relative"
+              className="relative text-xs sm:text-sm"
             >
-              Pending Requests
+              <span className="hidden sm:inline">Pending Requests</span>
+              <span className="sm:hidden">Pending</span>
               {stats.pendingRequests > 0 && (
-                <Badge className="ml-2 bg-red-500 text-white text-xs px-1.5 py-0.5">
+                <Badge className="ml-1 sm:ml-2 bg-red-500 text-white text-xs px-1.5 py-0.5">
                   {stats.pendingRequests}
                 </Badge>
               )}
@@ -735,22 +737,28 @@ export default function AdminDashboard() {
               value="users"
               currentValue={activeTab}
               onValueChange={setActiveTab}
+              className="text-xs sm:text-sm"
             >
-              Manage Users
+              <span className="hidden sm:inline">Manage Users</span>
+              <span className="sm:hidden">Users</span>
             </TabsTrigger>
             <TabsTrigger
               value="courses"
               currentValue={activeTab}
               onValueChange={setActiveTab}
+              className="text-xs sm:text-sm"
             >
-              Manage Courses
+              <span className="hidden sm:inline">Manage Courses</span>
+              <span className="sm:hidden">Courses</span>
             </TabsTrigger>
             <TabsTrigger
               value="activity-logs"
               currentValue={activeTab}
               onValueChange={setActiveTab}
+              className="text-xs sm:text-sm"
             >
-              Activity Logs
+              <span className="hidden sm:inline">Activity Logs</span>
+              <span className="sm:hidden">Logs</span>
             </TabsTrigger>
           </TabsList>
 
@@ -761,7 +769,7 @@ export default function AdminDashboard() {
             className="space-y-6"
           >
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
               <Card className="bg-white border-[#344F1F]/20">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-[#344F1F]">
@@ -897,54 +905,55 @@ export default function AdminDashboard() {
                     <p className="text-gray-600">No pending requests</p>
                   </div>
                 ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>User</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Role</TableHead>
-                        <TableHead>Requested Date</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {pendingUsers.map((user) => (
-                        <TableRow key={user.id}>
-                          <TableCell>
-                            <div className="flex items-center gap-3">
-                              <Avatar className="h-8 w-8">
-                                <AvatarFallback className="bg-[#344F1F] text-[#F2EAD3] text-sm">
-                                  {user.first_name[0]}
-                                  {user.last_name[0]}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span className="font-medium">
-                                {user.first_name} {user.last_name}
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell>{user.email}</TableCell>
-                          <TableCell>{getRoleBadge(user.role)}</TableCell>
-                          <TableCell>
-                            {new Date(user.created_at).toLocaleDateString()}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                size="sm"
-                                onClick={() => approveUser(user.id)}
-                                className="bg-green-600 hover:bg-green-700 text-white"
-                              >
-                                <CheckCircle className="h-4 w-4 mr-1" />
-                                Approve
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => rejectUser(user.id)}
-                              >
-                                <XCircle className="h-4 w-4 mr-1" />
-                                Reject
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="whitespace-nowrap">User</TableHead>
+                          <TableHead className="whitespace-nowrap">Email</TableHead>
+                          <TableHead className="whitespace-nowrap">Role</TableHead>
+                          <TableHead className="whitespace-nowrap">Requested Date</TableHead>
+                          <TableHead className="whitespace-nowrap">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {pendingUsers.map((user) => (
+                          <TableRow key={user.id}>
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <Avatar className="h-8 w-8">
+                                  <AvatarFallback className="bg-[#344F1F] text-[#F2EAD3] text-sm">
+                                    {user.first_name[0]}
+                                    {user.last_name[0]}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span className="font-medium whitespace-nowrap">
+                                  {user.first_name} {user.last_name}
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="whitespace-nowrap">{user.email}</TableCell>
+                            <TableCell>{getRoleBadge(user.role)}</TableCell>
+                            <TableCell className="whitespace-nowrap">
+                              {new Date(user.created_at).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  size="sm"
+                                  onClick={() => approveUser(user.id)}
+                                  className="bg-green-600 hover:bg-green-700 text-white"
+                                >
+                                  <CheckCircle className="h-4 w-4 mr-1" />
+                                  <span className="hidden sm:inline">Approve</span>
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => rejectUser(user.id)}
+                                >
+                                  <XCircle className="h-4 w-4 mr-1" />
+                                  <span className="hidden sm:inline">Reject</span>
                               </Button>
                             </div>
                           </TableCell>
@@ -952,6 +961,7 @@ export default function AdminDashboard() {
                       ))}
                     </TableBody>
                   </Table>
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -1007,79 +1017,81 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Users Table */}
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>User</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Join Date</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredUsers.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <Avatar className="h-8 w-8">
-                              <AvatarFallback className="bg-[#344F1F] text-[#F2EAD3] text-sm">
-                                {user.first_name[0]}
-                                {user.last_name[0]}
-                              </AvatarFallback>
-                            </Avatar>
-                            <span className="font-medium">
-                              {user.first_name} {user.last_name}
-                            </span>
-                          </div>
-                        </TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>{getRoleBadge(user.role)}</TableCell>
-                        <TableCell>{getStatusBadge(user.status)}</TableCell>
-                        <TableCell>
-                          {new Date(user.created_at).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() =>
-                                toggleUserStatus(user.id, user.status)
-                              }
-                              className={
-                                user.status === "suspended"
-                                  ? "text-green-600 hover:text-green-700"
-                                  : "text-orange-600 hover:text-orange-700"
-                              }
-                            >
-                              {user.status === "suspended" ? (
-                                <>
-                                  <CheckCircle className="h-4 w-4 mr-1" />
-                                  Reactivate
-                                </>
-                              ) : (
-                                <>
-                                  <UserX className="h-4 w-4 mr-1" />
-                                  Suspend
-                                </>
-                              )}
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => deleteUser(user.id)}
-                            >
-                              <Trash2 className="h-4 w-4 mr-1" />
-                              Delete
-                            </Button>
-                          </div>
-                        </TableCell>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="whitespace-nowrap">User</TableHead>
+                        <TableHead className="whitespace-nowrap">Email</TableHead>
+                        <TableHead className="whitespace-nowrap">Role</TableHead>
+                        <TableHead className="whitespace-nowrap">Status</TableHead>
+                        <TableHead className="whitespace-nowrap">Join Date</TableHead>
+                        <TableHead className="whitespace-nowrap">Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredUsers.map((user) => (
+                        <TableRow key={user.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-8 w-8">
+                                <AvatarFallback className="bg-[#344F1F] text-[#F2EAD3] text-sm">
+                                  {user.first_name[0]}
+                                  {user.last_name[0]}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="font-medium whitespace-nowrap">
+                                {user.first_name} {user.last_name}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap">{user.email}</TableCell>
+                          <TableCell>{getRoleBadge(user.role)}</TableCell>
+                          <TableCell>{getStatusBadge(user.status)}</TableCell>
+                          <TableCell className="whitespace-nowrap">
+                            {new Date(user.created_at).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() =>
+                                  toggleUserStatus(user.id, user.status)
+                                }
+                                className={
+                                  user.status === "suspended"
+                                    ? "text-green-600 hover:text-green-700"
+                                    : "text-orange-600 hover:text-orange-700"
+                                }
+                              >
+                                {user.status === "suspended" ? (
+                                  <>
+                                    <CheckCircle className="h-4 w-4 sm:mr-1" />
+                                    <span className="hidden sm:inline">Reactivate</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <UserX className="h-4 w-4 sm:mr-1" />
+                                    <span className="hidden sm:inline">Suspend</span>
+                                  </>
+                                )}
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => deleteUser(user.id)}
+                              >
+                                <Trash2 className="h-4 w-4 sm:mr-1" />
+                                <span className="hidden sm:inline">Delete</span>
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
 
                 {filteredUsers.length === 0 && (
                   <div className="text-center py-8">
