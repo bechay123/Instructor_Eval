@@ -45,16 +45,12 @@ import {
   ThumbsUp,
   AlertCircle,
   TrendingDown,
-  History,
-  Clock,
 } from "lucide-react";
 import { 
   generateAIAnalysis, 
-  saveAIReport, 
-  getAIReportsForCourse, 
-  getLatestAIReport 
+  saveAIReport,
 } from "@/services/openai-service";
-import type { AIAnalysisResult, AIReport } from "@/services/openai-service";
+import type { AIAnalysisResult } from "@/services/openai-service";
 
 interface Course {
   id: string;
@@ -167,8 +163,6 @@ export default function InstructorDashboard() {
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysisResult | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
-  const [aiReports, setAiReports] = useState<AIReport[]>([]);
-  const [showReportHistory, setShowReportHistory] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
@@ -181,7 +175,6 @@ export default function InstructorDashboard() {
   useEffect(() => {
     if (selectedCourse) {
       fetchEvaluationData(selectedCourse);
-      loadAIReports(selectedCourse);
     }
   }, [selectedCourse]);
 
@@ -854,8 +847,6 @@ export default function InstructorDashboard() {
 
       if (savedReport) {
         console.log("✅ AI report saved successfully", savedReport);
-        // Reload reports to include the new one
-        await loadAIReports(selectedCourse);
       } else {
         console.warn("⚠️ AI report generated but not saved to database");
       }
@@ -868,34 +859,6 @@ export default function InstructorDashboard() {
       );
     } finally {
       setAiLoading(false);
-    }
-  };
-
-  // Load AI Reports from database
-  const loadAIReports = async (courseId: string) => {
-    try {
-      const reports = await getAIReportsForCourse(courseId);
-      setAiReports(reports);
-
-      // If there's a latest report and no current analysis, load it
-      if (reports.length > 0 && !aiAnalysis) {
-        const latestReport = reports[0];
-        setAiAnalysis({
-          summary: latestReport.summary,
-          strengths: latestReport.strengths,
-          areasForImprovement: latestReport.areas_for_improvement,
-          recommendations: latestReport.recommendations,
-          sentimentAnalysis: {
-            overall: latestReport.sentiment_overall,
-            teaching: latestReport.sentiment_teaching,
-            materials: latestReport.sentiment_materials,
-            communication: latestReport.sentiment_communication,
-          },
-          keyThemes: latestReport.key_themes,
-        });
-      }
-    } catch (error) {
-      console.error("Error loading AI reports:", error);
     }
   };
 

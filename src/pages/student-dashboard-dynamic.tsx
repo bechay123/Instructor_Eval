@@ -17,7 +17,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import {
   Dialog,
@@ -660,7 +659,7 @@ export default function StudentDashboard() {
   };
 
   const renderHorizontalLikertScale = (
-    index: number,
+    _index: number,
     questionKey: keyof EvaluationData,
     label: string
   ) => (
