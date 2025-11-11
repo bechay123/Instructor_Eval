@@ -34,6 +34,7 @@ interface AuthContextType {
     lastName?: string;
     role?: UserRole;
   }) => Promise<{ error: Error | null }>;
+  refreshSession: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -58,6 +59,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
+      // Check if authUser.id is undefined on first attempt
+      if (!authUser?.id) {
+        console.error("🔴 fetchUserProfile: authUser.id is undefined, reloading page...");
+        window.location.reload();
+        return;
+      }
+
       console.log(
         "🟡 fetchUserProfile: Fetching profile for user:",
         authUser.id
@@ -74,11 +82,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
         
         console.log("🟡 fetchUserProfile: Waiting for query response...");
-        const { data: profile, error: profileError } = await supabase
+        
+        // Add timeout to prevent infinite hanging
+        const queryPromise = supabase
           .from("profiles")
           .select("role, first_name, last_name, status, is_active")
           .eq("id", authUser.id)
           .single();
+        
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error("Profile fetch timeout after 10 seconds")), 10000)
+        );
+        
+        const { data: profile, error: profileError } = await Promise.race([
+          queryPromise,
+          timeoutPromise
+        ]).catch(err => {
+          console.error("🔴 fetchUserProfile: Query failed or timed out:", err);
+          return { data: null, error: err };
+        }) as any;
 
         console.log("🟡 fetchUserProfile: Query completed, mounted =", mounted);
         console.log("🟡 fetchUserProfile: RAW RESPONSE:", {
@@ -163,79 +185,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.log("🟡 fetchUserProfile: Function completed");
     };
 
-    // Get initial session first
-    const getInitialSession = async () => {
-      console.log("🟠 getInitialSession: Starting...");
-      console.log("🟠 getInitialSession: Showing loading UI");
-      showLoading("Initializing...", "Checking authentication");
-
-      try {
-        console.log("🟠 getInitialSession: Calling supabase.auth.getSession()");
-        const {
-          data: { session: initialSession },
-        } = await supabase.auth.getSession();
-
-        console.log(
-          "🟠 getInitialSession: getSession completed, mounted =",
-          mounted
-        );
-        console.log("🟠 getInitialSession: Has session?", !!initialSession);
-        console.log("🟠 getInitialSession: Session details:", {
-          hasSession: !!initialSession,
-          hasUser: !!initialSession?.user,
-          userId: initialSession?.user?.id,
-          userEmail: initialSession?.user?.email,
-        });
-
-        if (!mounted) {
-          console.log(
-            "🔴 getInitialSession: Component unmounted, but will still update initializing state"
-          );
-        }
-
-        if (initialSession?.user && mounted) {
-          console.log(
-            "🟢 getInitialSession: Initial session found, user ID:",
-            initialSession.user.id
-          );
-          console.log("🟠 getInitialSession: Calling fetchUserProfile...");
-          await fetchUserProfile(initialSession.user);
-          console.log("🟠 getInitialSession: fetchUserProfile completed");
-        } else if (!initialSession?.user && mounted) {
-          console.log("🔴 getInitialSession: No initial session found");
-          console.log("🔴 getInitialSession: Setting user to null");
-          setUser(null);
-        }
-      } catch (error) {
-        console.error(
-          "🔴 getInitialSession: Error getting initial session:",
-          error
-        );
-        if (mounted) {
-          console.log(
-            "🔴 getInitialSession: Setting user to null due to error"
-          );
-          setUser(null);
-        }
-      } finally {
-        // ALWAYS set initializing to false, even if unmounted
-        // This is safe because React will batch state updates
-        console.log("🟠 getInitialSession: Finally block, mounted =", mounted);
-        console.log(
-          "🟢 getInitialSession: Setting initializing to false (regardless of mount state)"
-        );
-        setInitializing(false);
-        console.log("🟢 getInitialSession: Hiding loading UI");
-        hideLoading();
-        console.log("🟢 getInitialSession: Initial session check complete");
-      }
-    };
-
-    console.log("🔵 AuthContext: Calling getInitialSession()");
-    getInitialSession();
-
-    // Listen for auth changes
+    // Listen for auth changes - handles both initial session and changes
     console.log("🔵 AuthContext: Setting up onAuthStateChange listener");
+    let hasHandledInitialSession = false;
+    
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -245,7 +198,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         "| Has session:",
         !!session
       );
-      console.log("🟣 onAuthStateChange: mounted =", mounted);
 
       if (!mounted) {
         console.log(
@@ -254,25 +206,49 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
-      // Skip if this is during initial setup
+      // Handle INITIAL_SESSION to set initializing to false
       if (event === "INITIAL_SESSION") {
-        console.log(
-          "🟣 onAuthStateChange: Skipping INITIAL_SESSION event (already handled)"
-        );
+        console.log("🟣 onAuthStateChange: Handling INITIAL_SESSION");
+        hasHandledInitialSession = true;
+        if (session?.user) {
+          console.log("� onAuthStateChange: Initial session found, fetching profile");
+          showLoading("Loading profile...", "Please wait");
+          await fetchUserProfile(session.user);
+          hideLoading();
+        } else {
+          console.log("🟣 onAuthStateChange: No initial session");
+          setUser(null);
+        }
+        setInitializing(false);
+        hideLoading();
         return;
       }
 
+      // Ignore other events until INITIAL_SESSION has been handled
+      if (!hasHandledInitialSession) {
+        console.log("🟡 onAuthStateChange: Ignoring", event, "- waiting for INITIAL_SESSION");
+        return;
+      }
+
+      // Only handle SIGNED_OUT and TOKEN_REFRESHED, ignore SIGNED_IN (already handled in INITIAL_SESSION)
+      if (event === "SIGNED_IN") {
+        console.log("🟡 onAuthStateChange: Ignoring duplicate SIGNED_IN event");
+        return;
+      }
+
+      if (event === "TOKEN_REFRESHED") {
+        console.log("🟡 onAuthStateChange: Token refreshed, no action needed");
+        return;
+      }
+
+      // Handle other auth events (SIGNED_OUT, etc.)
       if (session?.user) {
         console.log(
-          "🟢 onAuthStateChange: Session user found, user ID:",
+          "� onAuthStateChange: Session user found, user ID:",
           session.user.id
         );
-        console.log("🟣 onAuthStateChange: Showing loading UI");
         showLoading("Loading profile...", "Please wait");
-        console.log("🟣 onAuthStateChange: Calling fetchUserProfile...");
         await fetchUserProfile(session.user);
-        console.log("🟣 onAuthStateChange: fetchUserProfile completed");
-        console.log("🟣 onAuthStateChange: Hiding loading UI");
         hideLoading();
       } else {
         console.log("🔴 onAuthStateChange: No session, clearing user");
@@ -386,25 +362,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (authError) throw authError;
       if (!data.user) throw new Error("No user data returned from signup");
 
+      // Wait for the trigger to create the profile with default values
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      const result = await supabase
+      // Update the profile with actual user data
+      const { error: profileError } = await supabase
         .from("profiles")
-        .insert([
-          {
-            id: data.user.id,
-            role,
-            first_name: firstName,
-            last_name: lastName,
-            email,
-            is_active: false,
-            status: "pending",
-          },
-        ])
-        .select();
+        .update({
+          role: role,
+          first_name: firstName,
+          last_name: lastName,
+          email: email,
+          is_active: false,
+          status: "pending",
+        })
+        .eq("id", data.user.id);
 
-      if (result.error) throw result.error;
+      if (profileError) throw profileError;
 
+      // Create role-specific details
       if (role === "student") {
         await supabase.from("student_details").insert([
           {
@@ -471,6 +447,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const refreshSession = async () => {
+    try {
+      console.log("🔄 refreshSession: Manually refreshing session...");
+      showLoading("Refreshing...", "Please wait");
+      
+      const { data: { session }, error } = await supabase.auth.refreshSession();
+      
+      if (error) {
+        console.error("🔴 refreshSession: Error refreshing:", error);
+        hideLoading();
+        throw error;
+      }
+      
+      console.log("🔄 refreshSession: Complete");
+      hideLoading();
+    } catch (error) {
+      console.error("🔴 refreshSession: Failed:", error);
+      hideLoading();
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -481,6 +478,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         register,
         resetPassword,
         updateProfile,
+        refreshSession,
       }}
     >
       {children}

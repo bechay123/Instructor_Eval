@@ -100,8 +100,7 @@ interface Course {
 
 interface AcademicTerm {
   id: string;
-  academic_year: number;
-  semester: string;
+  academic_term: string;
   start_date: string;
   end_date: string;
   is_active: boolean;
@@ -396,7 +395,7 @@ export default function AdminDashboard() {
     const { data, error } = await supabase
       .from("academic_terms")
       .select("*")
-      .order("academic_year", { ascending: false });
+      .order("start_date", { ascending: false });
 
     if (error) {
       console.error("Error loading academic terms:", error);
@@ -1288,7 +1287,7 @@ export default function AdminDashboard() {
                             ) : (
                               academicTerms.map((term) => (
                                 <SelectItem key={term.id} value={term.id}>
-                                  {term.semester} - {term.academic_year}
+                                  {term.academic_term}
                                   {term.is_active && (
                                     <span className="text-xs text-green-600 ml-2">
                                       (Active)
