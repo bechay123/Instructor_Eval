@@ -452,7 +452,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.log("🔄 refreshSession: Manually refreshing session...");
       showLoading("Refreshing...", "Please wait");
       
-      const { data: { session }, error } = await supabase.auth.refreshSession();
+      const { error } = await supabase.auth.refreshSession();
       
       if (error) {
         console.error("🔴 refreshSession: Error refreshing:", error);
