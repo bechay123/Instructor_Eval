@@ -68,22 +68,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           fields: "role, first_name, last_name, status, is_active"
         });
         
-        // Add timeout to catch hanging queries
-        const queryPromise = supabase
+        console.log("🟡 fetchUserProfile: Waiting for query response...");
+        const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("role, first_name, last_name, status, is_active")
           .eq("id", authUser.id)
           .single();
-        
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Query timeout after 5 seconds')), 5000)
-        );
-        
-        console.log("🟡 fetchUserProfile: Waiting for query response...");
-        const { data: profile, error: profileError } = await Promise.race([
-          queryPromise,
-          timeoutPromise
-        ]) as any;
 
         console.log("🟡 fetchUserProfile: Query completed, mounted =", mounted);
         console.log("🟡 fetchUserProfile: RAW RESPONSE:", { data: profile, error: profileError });
