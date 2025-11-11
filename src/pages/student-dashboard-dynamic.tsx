@@ -635,6 +635,7 @@ export default function StudentDashboard() {
   };
 
   const isCurrentSectionComplete = () => {
+    // Check Likert scale questions
     const getCurrentSectionQuestions = () => {
       switch (currentSection) {
         case 0:
@@ -652,10 +653,34 @@ export default function StudentDashboard() {
       }
     };
 
-    return getCurrentSectionQuestions().every((key) => {
+    // Check if all required Likert scale questions are answered
+    const isLikertComplete = getCurrentSectionQuestions().every((key) => {
       const value = evaluationData[key as keyof EvaluationData];
       return typeof value === "number" ? value > 0 : true;
     });
+
+    // Check open-ended questions
+    const isOpenEndedComplete = () => {
+      switch (currentSection) {
+        case 0:
+          return evaluationData.a7_tools_used.trim().length > 0;
+        case 1:
+          return evaluationData.b7_lecture_forms.trim().length > 0;
+        case 2:
+          return evaluationData.c7_strategies.trim().length > 0;
+        case 3:
+          return (
+            evaluationData.d7a_learning_experiences.trim().length > 0 &&
+            evaluationData.d7b_relevant_requirements.trim().length > 0
+          );
+        case 4:
+          return evaluationData.e2_comments.trim().length > 0;
+        default:
+          return true;
+      }
+    };
+
+    return isLikertComplete && isOpenEndedComplete();
   };
 
   const renderHorizontalLikertScale = (
@@ -883,6 +908,24 @@ export default function StudentDashboard() {
                   Rate the following aspects of communication and information
                   delivery
                 </CardDescription>
+                {/* Rating Scale Legend */}
+                <div className="mt-4 bg-[#F9F5F0] p-4 rounded-lg border border-[#344F1F]/10">
+                  <h4 className="text-sm font-semibold text-[#344F1F] mb-2">
+                    Rating Scale:
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm">
+                    {Object.entries(ratingScale).map(
+                      ([rating, description]) => (
+                        <div key={rating} className="flex items-start gap-2">
+                          <span className="font-semibold text-[#344F1F] min-w-[20px]">
+                            {rating}:
+                          </span>
+                          <span className="text-gray-600">{description}</span>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
@@ -923,10 +966,11 @@ export default function StudentDashboard() {
                 <div className="mt-6">
                   <Label
                     htmlFor="a7_tools_used"
-                    className="text-[#344F1F] font-medium"
+                    className="text-[#344F1F] font-medium flex items-center gap-1"
                   >
                     7. What tools/platform/s did the instructor use to deliver
                     the course?
+                    <span className="text-red-500">*</span>
                   </Label>
                   <Textarea
                     id="a7_tools_used"
@@ -934,7 +978,11 @@ export default function StudentDashboard() {
                     onChange={(e) =>
                       handleCommentChange("a7_tools_used", e.target.value)
                     }
-                    className="mt-2 border-[#344F1F]/20"
+                    className={`mt-2 border-[#344F1F]/20 ${
+                      !evaluationData.a7_tools_used.trim() &&
+                      "border-red-200 focus-visible:ring-red-500"
+                    }`}
+                    placeholder="Required: Please provide your response here..."
                     rows={3}
                   />
                 </div>
@@ -952,6 +1000,24 @@ export default function StudentDashboard() {
                 <CardDescription>
                   Rate the quality of instruction and learning materials
                 </CardDescription>
+                {/* Rating Scale Legend */}
+                <div className="mt-4 bg-[#F9F5F0] p-4 rounded-lg border border-[#344F1F]/10">
+                  <h4 className="text-sm font-semibold text-[#344F1F] mb-2">
+                    Rating Scale:
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm">
+                    {Object.entries(ratingScale).map(
+                      ([rating, description]) => (
+                        <div key={rating} className="flex items-start gap-2">
+                          <span className="font-semibold text-[#344F1F] min-w-[20px]">
+                            {rating}:
+                          </span>
+                          <span className="text-gray-600">{description}</span>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
@@ -992,10 +1058,11 @@ export default function StudentDashboard() {
                 <div className="mt-6">
                   <Label
                     htmlFor="b7_lecture_forms"
-                    className="text-[#344F1F] font-medium"
+                    className="text-[#344F1F] font-medium flex items-center gap-1"
                   >
                     7. What forms of lecture did the instructor use in this
                     course?
+                    <span className="text-red-500">*</span>
                   </Label>
                   <Textarea
                     id="b7_lecture_forms"
@@ -1003,7 +1070,11 @@ export default function StudentDashboard() {
                     onChange={(e) =>
                       handleCommentChange("b7_lecture_forms", e.target.value)
                     }
-                    className="mt-2 border-[#344F1F]/20"
+                    className={`mt-2 border-[#344F1F]/20 ${
+                      !evaluationData.b7_lecture_forms.trim() &&
+                      "border-red-200 focus-visible:ring-red-500"
+                    }`}
+                    placeholder="Required: Please provide your response here..."
                     rows={3}
                   />
                 </div>
@@ -1021,6 +1092,24 @@ export default function StudentDashboard() {
                 <CardDescription>
                   Rate instructor engagement and accessibility
                 </CardDescription>
+                {/* Rating Scale Legend */}
+                <div className="mt-4 bg-[#F9F5F0] p-4 rounded-lg border border-[#344F1F]/10">
+                  <h4 className="text-sm font-semibold text-[#344F1F] mb-2">
+                    Rating Scale:
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm">
+                    {Object.entries(ratingScale).map(
+                      ([rating, description]) => (
+                        <div key={rating} className="flex items-start gap-2">
+                          <span className="font-semibold text-[#344F1F] min-w-[20px]">
+                            {rating}:
+                          </span>
+                          <span className="text-gray-600">{description}</span>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
@@ -1061,9 +1150,10 @@ export default function StudentDashboard() {
                 <div className="mt-6">
                   <Label
                     htmlFor="c7_strategies"
-                    className="text-[#344F1F] font-medium"
+                    className="text-[#344F1F] font-medium flex items-center gap-1"
                   >
                     7. What engagement strategies did your instructor use?
+                    <span className="text-red-500">*</span>
                   </Label>
                   <Textarea
                     id="c7_strategies"
@@ -1071,7 +1161,11 @@ export default function StudentDashboard() {
                     onChange={(e) =>
                       handleCommentChange("c7_strategies", e.target.value)
                     }
-                    className="mt-2 border-[#344F1F]/20"
+                    className={`mt-2 border-[#344F1F]/20 ${
+                      !evaluationData.c7_strategies.trim() &&
+                      "border-red-200 focus-visible:ring-red-500"
+                    }`}
+                    placeholder="Required: Please provide your response here..."
                     rows={3}
                   />
                 </div>
@@ -1089,6 +1183,24 @@ export default function StudentDashboard() {
                 <CardDescription>
                   Rate assessment methods and academic integrity practices
                 </CardDescription>
+                {/* Rating Scale Legend */}
+                <div className="mt-4 bg-[#F9F5F0] p-4 rounded-lg border border-[#344F1F]/10">
+                  <h4 className="text-sm font-semibold text-[#344F1F] mb-2">
+                    Rating Scale:
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm">
+                    {Object.entries(ratingScale).map(
+                      ([rating, description]) => (
+                        <div key={rating} className="flex items-start gap-2">
+                          <span className="font-semibold text-[#344F1F] min-w-[20px]">
+                            {rating}:
+                          </span>
+                          <span className="text-gray-600">{description}</span>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
@@ -1130,10 +1242,11 @@ export default function StudentDashboard() {
                   <div>
                     <Label
                       htmlFor="d7a_learning_experiences"
-                      className="text-[#344F1F] font-medium"
+                      className="text-[#344F1F] font-medium flex items-center gap-1"
                     >
                       7a. What learning experiences were most valuable in this
                       course?
+                      <span className="text-red-500">*</span>
                     </Label>
                     <Textarea
                       id="d7a_learning_experiences"
@@ -1144,17 +1257,22 @@ export default function StudentDashboard() {
                           e.target.value
                         )
                       }
-                      className="mt-2 border-[#344F1F]/20"
+                      className={`mt-2 border-[#344F1F]/20 ${
+                        !evaluationData.d7a_learning_experiences.trim() &&
+                        "border-red-200 focus-visible:ring-red-500"
+                      }`}
+                      placeholder="Required: Please provide your response here..."
                       rows={3}
                     />
                   </div>
                   <div>
                     <Label
                       htmlFor="d7b_relevant_requirements"
-                      className="text-[#344F1F] font-medium"
+                      className="text-[#344F1F] font-medium flex items-center gap-1"
                     >
                       7b. What course requirements were most relevant to your
                       learning?
+                      <span className="text-red-500">*</span>
                     </Label>
                     <Textarea
                       id="d7b_relevant_requirements"
@@ -1165,7 +1283,11 @@ export default function StudentDashboard() {
                           e.target.value
                         )
                       }
-                      className="mt-2 border-[#344F1F]/20"
+                      className={`mt-2 border-[#344F1F]/20 ${
+                        !evaluationData.d7b_relevant_requirements.trim() &&
+                        "border-red-200 focus-visible:ring-red-500"
+                      }`}
+                      placeholder="Required: Please provide your response here..."
                       rows={3}
                     />
                   </div>
@@ -1184,6 +1306,24 @@ export default function StudentDashboard() {
                 <CardDescription>
                   Overall evaluation and recommendations
                 </CardDescription>
+                {/* Rating Scale Legend */}
+                <div className="mt-4 bg-[#F9F5F0] p-4 rounded-lg border border-[#344F1F]/10">
+                  <h4 className="text-sm font-semibold text-[#344F1F] mb-2">
+                    Rating Scale:
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm">
+                    {Object.entries(ratingScale).map(
+                      ([rating, description]) => (
+                        <div key={rating} className="flex items-start gap-2">
+                          <span className="font-semibold text-[#344F1F] min-w-[20px]">
+                            {rating}:
+                          </span>
+                          <span className="text-gray-600">{description}</span>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
@@ -1224,9 +1364,10 @@ export default function StudentDashboard() {
                 <div className="mt-6">
                   <Label
                     htmlFor="e2_comments"
-                    className="text-[#344F1F] font-medium"
+                    className="text-[#344F1F] font-medium flex items-center gap-1"
                   >
                     2. Additional Comments and Suggestions
+                    <span className="text-red-500">*</span>
                   </Label>
                   <Textarea
                     id="e2_comments"
@@ -1234,9 +1375,12 @@ export default function StudentDashboard() {
                     onChange={(e) =>
                       handleCommentChange("e2_comments", e.target.value)
                     }
-                    className="mt-2 border-[#344F1F]/20"
+                    className={`mt-2 border-[#344F1F]/20 ${
+                      !evaluationData.e2_comments.trim() &&
+                      "border-red-200 focus-visible:ring-red-500"
+                    }`}
                     rows={5}
-                    placeholder="Share any additional feedback, suggestions, or comments about the course and instructor..."
+                    placeholder="Required: Please provide your feedback and suggestions here..."
                   />
                 </div>
               </CardContent>
@@ -1256,55 +1400,48 @@ export default function StudentDashboard() {
             </Button>
 
             {currentSection < sections.length - 1 ? (
-              <Button
-                onClick={() => setCurrentSection(currentSection + 1)}
-                disabled={!isCurrentSectionComplete()}
-                className="bg-[#344F1F] hover:bg-[#344F1F]/90 text-[#F2EAD3]"
-              >
-                Next
-                <ChevronRight className="h-4 w-4 ml-2" />
-              </Button>
-            ) : (
-              <Button
-                onClick={handleSubmit}
-                disabled={!isCurrentSectionComplete() || isSubmitting}
-                className="bg-[#F4991A] hover:bg-[#F4991A]/90 text-white"
-              >
-                {isSubmitting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Submitting...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="h-4 w-4 mr-2" />
-                    Submit Evaluation
-                  </>
+              <div className="flex flex-col items-end gap-2">
+                {!isCurrentSectionComplete() && (
+                  <p className="text-sm text-red-500">
+                    Please complete all required fields to proceed
+                  </p>
                 )}
-              </Button>
+                <Button
+                  onClick={() => setCurrentSection(currentSection + 1)}
+                  disabled={!isCurrentSectionComplete()}
+                  className="bg-[#344F1F] hover:bg-[#344F1F]/90 text-[#F2EAD3]"
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-2" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-col items-end gap-2">
+                {!isCurrentSectionComplete() && (
+                  <p className="text-sm text-red-500">
+                    Please complete all required fields before submitting
+                  </p>
+                )}
+                <Button
+                  onClick={handleSubmit}
+                  disabled={!isCurrentSectionComplete() || isSubmitting}
+                  className="bg-[#F4991A] hover:bg-[#F4991A]/90 text-white"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="h-4 w-4 mr-2" />
+                      Submit Evaluation
+                    </>
+                  )}
+                </Button>
+              </div>
             )}
           </div>
-
-          {/* Rating Scale Reference */}
-          <Card className="mt-6 bg-[#F9F5F0] border-[#344F1F]/20">
-            <CardHeader>
-              <CardTitle className="text-sm text-[#344F1F]">
-                Rating Scale
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-1 text-xs">
-                {Object.entries(ratingScale).map(([key, value]) => (
-                  <div key={key} className="flex gap-2">
-                    <span className="font-semibold text-[#344F1F] w-4">
-                      {key}:
-                    </span>
-                    <span className="text-black/70">{value}</span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
     );

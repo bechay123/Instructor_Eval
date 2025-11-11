@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { supabase } from "../supabase-client";
 import { GraduationCap, Users, User, Lock, Eye, EyeOff } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -14,13 +15,17 @@ interface LoginModalProps {
 
 export function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, logout } = useAuth();
   const [loginEmail, setLoginEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<"student" | "instructor">("student");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [detectedRole, setDetectedRole] = useState<
+    "student" | "instructor" | "admin" | null
+  >(null);
+  const [roleLookupLoading, setRoleLookupLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,19 +36,23 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
     try {
       console.log("Attempting login with:", { email: loginEmail, role });
 
+      const INVALID_CREDENTIALS_MSG =
+        "ERROR: Incorrect username or password. Either no user with the given username could be found, or the password you gave was wrong. Please check the username and try again.";
+
       const { error, role: userRole } = await login(loginEmail, password);
       console.log("Login response:", { error, userRole });
 
+      // For any auth error or missing role, show the generic incorrect-credentials message
       if (error) {
         console.error("Login error:", error);
-        setError(error.message);
+        setError(INVALID_CREDENTIALS_MSG);
         setIsLoading(false);
         return;
       }
 
       if (!userRole) {
         console.error("No role returned");
-        setError("Failed to determine user role");
+        setError(INVALID_CREDENTIALS_MSG);
         setIsLoading(false);
         return;
       }
@@ -55,9 +64,14 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
       if (userRole !== "admin") {
         if (userRole !== role) {
           console.error("Role mismatch:", { userRole, selectedRole: role });
-          setError(
-            `This account is registered as a ${userRole}. Please select the correct role.`
-          );
+          // Sign out immediately so the session isn't left active
+          try {
+            await logout();
+          } catch (err) {
+            console.warn("Failed to logout after role mismatch:", err);
+          }
+          // Deliberately show the same generic invalid credentials message for role mismatches
+          setError(INVALID_CREDENTIALS_MSG);
           setIsLoading(false);
           return;
         }
@@ -130,28 +144,88 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
               <div className="flex gap-4">
                 <button
                   type="button"
-                  onClick={() => setRole("student")}
+                  onClick={() => {
+                    if (
+                      detectedRole &&
+                      detectedRole !== "student" &&
+                      detectedRole !== "admin"
+                    )
+                      return;
+                    setRole("student");
+                  }}
+                  disabled={
+                    !!detectedRole &&
+                    detectedRole !== "student" &&
+                    detectedRole !== "admin"
+                  }
                   className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
                     role === "student"
                       ? "border-[#344F1F] bg-[#344F1F]/5 text-[#344F1F]"
-                      : "border-gray-200 text-black/60 hover:border-[#344F1F]/30"
+                      : "border-gray-200 text-black/60"
+                  } ${
+                    !!detectedRole &&
+                    detectedRole !== "student" &&
+                    detectedRole !== "admin"
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:border-[#344F1F]/30"
                   }`}
                 >
                   <GraduationCap className="w-4 h-4" />
                   Student
                 </button>
+
                 <button
                   type="button"
-                  onClick={() => setRole("instructor")}
+                  onClick={() => {
+                    if (
+                      detectedRole &&
+                      detectedRole !== "instructor" &&
+                      detectedRole !== "admin"
+                    )
+                      return;
+                    setRole("instructor");
+                  }}
+                  disabled={
+                    !!detectedRole &&
+                    detectedRole !== "instructor" &&
+                    detectedRole !== "admin"
+                  }
                   className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
                     role === "instructor"
                       ? "border-[#344F1F] bg-[#344F1F]/5 text-[#344F1F]"
-                      : "border-gray-200 text-black/60 hover:border-[#344F1F]/30"
+                      : "border-gray-200 text-black/60"
+                  } ${
+                    !!detectedRole &&
+                    detectedRole !== "instructor" &&
+                    detectedRole !== "admin"
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:border-[#344F1F]/30"
                   }`}
                 >
                   <Users className="w-4 h-4" />
                   Instructor
                 </button>
+              </div>
+
+              {/* Detected role hint */}
+              <div>
+                {roleLookupLoading ? (
+                  <p className="text-sm text-black/60 mt-1">
+                    Checking account role...
+                  </p>
+                ) : detectedRole ? (
+                  <p className="text-sm mt-1">
+                    <span className="font-medium">Detected role:</span>{" "}
+                    <span className="font-semibold text-[#344F1F]">
+                      {detectedRole}
+                    </span>
+                    {detectedRole !== role && (
+                      <span className="text-sm text-red-600 block">
+                        You cannot select the other role for this account.
+                      </span>
+                    )}
+                  </p>
+                ) : null}
               </div>
             </div>
 
@@ -168,6 +242,39 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                   placeholder="Enter your email"
                   value={loginEmail}
                   onChange={(e) => setLoginEmail(e.target.value)}
+                  onBlur={async () => {
+                    const email = loginEmail?.trim();
+                    if (!email) {
+                      setDetectedRole(null);
+                      return;
+                    }
+
+                    try {
+                      setRoleLookupLoading(true);
+                      const { data: profile, error: profileError } =
+                        await supabase
+                          .from("profiles")
+                          .select("role")
+                          .ilike("email", email)
+                          .maybeSingle();
+
+                      if (profileError) {
+                        console.warn("Role lookup error:", profileError);
+                        setDetectedRole(null);
+                      } else if (profile && profile.role) {
+                        setDetectedRole(
+                          profile.role as "student" | "instructor" | "admin"
+                        );
+                      } else {
+                        setDetectedRole(null);
+                      }
+                    } catch (err) {
+                      console.warn("Role lookup exception:", err);
+                      setDetectedRole(null);
+                    } finally {
+                      setRoleLookupLoading(false);
+                    }
+                  }}
                   className="pl-10 border-[#344F1F]/20 focus:border-[#F4991A] focus:ring-[#F4991A] text-black"
                   required
                 />

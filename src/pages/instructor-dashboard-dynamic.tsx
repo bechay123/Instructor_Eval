@@ -46,10 +46,7 @@ import {
   AlertCircle,
   TrendingDown,
 } from "lucide-react";
-import { 
-  generateAIAnalysis, 
-  saveAIReport,
-} from "@/services/openai-service";
+import { generateAIAnalysis, saveAIReport } from "@/services/openai-service";
 import type { AIAnalysisResult } from "@/services/openai-service";
 
 interface Course {
@@ -1543,17 +1540,17 @@ export default function InstructorDashboard() {
                       <p className="text-sm font-medium text-black/60 mb-1">
                         Overall Rating
                       </p>
-                      <div className="flex items-baseline gap-2">
-                        <p className="text-3xl font-bold text-[#F4991A]">
+                      <div className="flex items-baseline gap-3">
+                        <p className="text-4xl font-extrabold text-[#F4991A]">
                           {evaluationData?.overallRating.toFixed(1) || "0.0"}
                         </p>
-                        <p className="text-sm text-black/60">/5.0</p>
+                        <p className="text-sm font-semibold text-black">/5.0</p>
                       </div>
-                      <div className="flex gap-0.5 mt-2">
+                      <div className="flex gap-1 mt-3 items-center">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <Star
                             key={star}
-                            className={`h-4 w-4 ${
+                            className={`h-5 w-5 ${
                               star <=
                               Math.round(evaluationData?.overallRating || 0)
                                 ? "fill-[#F4991A] text-[#F4991A]"
@@ -1578,9 +1575,15 @@ export default function InstructorDashboard() {
                       <p className="text-sm font-medium text-black/60 mb-1">
                         Response Rate
                       </p>
-                      <p className="text-3xl font-bold text-[#344F1F]">
+                      <p className="text-3xl font-extrabold text-[#344F1F]">
                         {evaluationData?.responseRate.toFixed(0) || 0}%
                       </p>
+                      <div className="mt-3">
+                        <Progress
+                          value={evaluationData?.responseRate || 0}
+                          className="h-3 rounded-full"
+                        />
+                      </div>
                     </div>
                     <div className="p-3 bg-[#344F1F]/10 rounded-full">
                       <TrendingUp className="h-6 w-6 text-[#344F1F]" />
@@ -1652,7 +1655,9 @@ export default function InstructorDashboard() {
                           {evaluationData?.categoryAverages.teaching.toFixed(
                             1
                           ) || "0.0"}
-                          /5.0
+                          <span className="text-sm font-semibold text-black">
+                            /5.0
+                          </span>
                         </span>
                       </div>
                       <Progress
@@ -1673,7 +1678,9 @@ export default function InstructorDashboard() {
                           {evaluationData?.categoryAverages.materials.toFixed(
                             1
                           ) || "0.0"}
-                          /5.0
+                          <span className="text-sm font-semibold text-black">
+                            /5.0
+                          </span>
                         </span>
                       </div>
                       <Progress
@@ -1694,7 +1701,9 @@ export default function InstructorDashboard() {
                           {evaluationData?.categoryAverages.communication.toFixed(
                             1
                           ) || "0.0"}
-                          /5.0
+                          <span className="text-sm font-semibold text-black">
+                            /5.0
+                          </span>
                         </span>
                       </div>
                       <Progress
@@ -1766,11 +1775,19 @@ export default function InstructorDashboard() {
                                 <span className="text-sm text-black/80">
                                   {item.label}
                                 </span>
-                                <span className="text-sm font-semibold text-[#F4991A]">
-                                  {avg.toFixed(1)}/5.0
+                                <span className="inline-flex items-center gap-2">
+                                  <span className="text-lg font-extrabold text-[#F4991A]">
+                                    {avg.toFixed(1)}
+                                  </span>
+                                  <span className="text-sm font-semibold text-black">
+                                    /5
+                                  </span>
                                 </span>
                               </div>
-                              <Progress value={avg * 20} className="h-2" />
+                              <Progress
+                                value={avg * 20}
+                                className="h-3 rounded-full"
+                              />
                             </div>
                           );
                         })}
@@ -1819,11 +1836,19 @@ export default function InstructorDashboard() {
                                 <span className="text-sm text-black/80">
                                   {item.label}
                                 </span>
-                                <span className="text-sm font-semibold text-[#F4991A]">
-                                  {avg.toFixed(1)}/5.0
+                                <span className="inline-flex items-center gap-2">
+                                  <span className="text-lg font-extrabold text-[#F4991A]">
+                                    {avg.toFixed(1)}
+                                  </span>
+                                  <span className="text-sm font-semibold text-black">
+                                    /5
+                                  </span>
                                 </span>
                               </div>
-                              <Progress value={avg * 20} className="h-2" />
+                              <Progress
+                                value={avg * 20}
+                                className="h-3 rounded-full"
+                              />
                             </div>
                           );
                         })}
@@ -1875,11 +1900,19 @@ export default function InstructorDashboard() {
                                 <span className="text-sm text-black/80">
                                   {item.label}
                                 </span>
-                                <span className="text-sm font-semibold text-[#F4991A]">
-                                  {avg.toFixed(1)}/5.0
+                                <span className="inline-flex items-center gap-2">
+                                  <span className="text-lg font-extrabold text-[#F4991A]">
+                                    {avg.toFixed(1)}
+                                  </span>
+                                  <span className="text-sm font-semibold text-black">
+                                    /5
+                                  </span>
                                 </span>
                               </div>
-                              <Progress value={avg * 20} className="h-2" />
+                              <Progress
+                                value={avg * 20}
+                                className="h-3 rounded-full"
+                              />
                             </div>
                           );
                         })}
@@ -1893,7 +1926,7 @@ export default function InstructorDashboard() {
               <TabsContent value="comments" className="space-y-6">
                 <Card className="border-none shadow-lg bg-white">
                   <CardHeader>
-                    <CardTitle className="text-[#344F1F]">
+                    <CardTitle className="text-[#344F1F] text-center font-bold text-2xl">
                       Student Feedback
                     </CardTitle>
                     <CardDescription>
@@ -1906,45 +1939,106 @@ export default function InstructorDashboard() {
                       evaluationData.comments.map((comment, index) => (
                         <div
                           key={index}
-                          className="p-4 bg-[#F9F5F0] rounded-lg space-y-3"
+                          className="p-4 bg-white rounded-lg border-2 border-[#344F1F]/20 shadow-sm divide-y divide-[#344F1F]/10"
                         >
                           {comment.teaching_comments && (
-                            <div>
-                              <p className="text-sm font-semibold text-[#344F1F] mb-1">
-                                Teaching:
+                            <div className="py-3">
+                              <p className="text-base font-bold text-[#344F1F] text-left">
+                                Teaching
                               </p>
-                              <p className="text-sm text-black/80">
+                              <p className="text-sm text-black/80 whitespace-pre-wrap break-words text-justify">
                                 {comment.teaching_comments}
                               </p>
                             </div>
                           )}
                           {comment.materials_comments && (
-                            <div>
-                              <p className="text-sm font-semibold text-[#344F1F] mb-1">
-                                Materials:
+                            <div className="py-3">
+                              <p className="text-base font-bold text-[#344F1F] text-left">
+                                Materials
                               </p>
-                              <p className="text-sm text-black/80">
+                              <p className="text-sm text-black/80 whitespace-pre-wrap break-words text-justify">
                                 {comment.materials_comments}
                               </p>
                             </div>
                           )}
                           {comment.communication_comments && (
-                            <div>
-                              <p className="text-sm font-semibold text-[#344F1F] mb-1">
-                                Communication:
+                            <div className="py-3">
+                              <p className="text-base font-bold text-[#344F1F] text-left">
+                                Communication
                               </p>
-                              <p className="text-sm text-black/80">
+                              <p className="text-sm text-black/80 whitespace-pre-wrap break-words text-justify">
                                 {comment.communication_comments}
                               </p>
                             </div>
                           )}
                           {comment.general_comments && (
-                            <div>
-                              <p className="text-sm font-semibold text-[#344F1F] mb-1">
-                                General:
+                            <div className="py-3">
+                              <p className="text-base font-bold text-[#344F1F] text-left">
+                                General
                               </p>
-                              <p className="text-sm text-black/80">
-                                {comment.general_comments}
+                              <p className="text-sm text-black/80 whitespace-pre-wrap break-words text-justify">
+                                {(() => {
+                                  const text = comment.general_comments || "";
+                                  if (!text.trim()) {
+                                    return (
+                                      <span className="text-black/60">
+                                        No responses provided.
+                                      </span>
+                                    );
+                                  }
+                                  const lines = text.split("\n");
+                                  const labels = [
+                                    "Learning Experiences:",
+                                    "Relevant Requirements:",
+                                    "Recommendation:",
+                                    "Recommendation (",
+                                  ];
+                                  return lines.map((line, i) => {
+                                    const trimmed = line.trim();
+                                    const label = labels.find((l) =>
+                                      trimmed.startsWith(l)
+                                    );
+                                    if (label) {
+                                      const after = line.substring(
+                                        line.indexOf(label) + label.length
+                                      );
+                                      const afterTrim = after.trim();
+                                      const isRecommendation = label
+                                        .toLowerCase()
+                                        .startsWith("recommend");
+                                      return (
+                                        <span key={i}>
+                                          <span className="font-semibold">
+                                            {label}
+                                          </span>
+                                          {afterTrim ? (
+                                            isRecommendation ? (
+                                              <span className="text-lg font-bold text-[#F4991A] ml-1">
+                                                {afterTrim}
+                                              </span>
+                                            ) : (
+                                              <span>{after}</span>
+                                            )
+                                          ) : (
+                                            <span className="text-black/60">
+                                              {" "}
+                                              No response provided.
+                                            </span>
+                                          )}
+                                          {i < lines.length - 1 ? <br /> : null}
+                                        </span>
+                                      );
+                                    }
+                                    // If the line is empty, render a line break to preserve spacing
+                                    if (!trimmed) return <br key={i} />;
+                                    return (
+                                      <span key={i}>
+                                        {line}
+                                        {i < lines.length - 1 ? <br /> : null}
+                                      </span>
+                                    );
+                                  });
+                                })()}
                               </p>
                             </div>
                           )}
@@ -1970,13 +2064,18 @@ export default function InstructorDashboard() {
                           AI-Powered Analysis
                         </CardTitle>
                         <CardDescription>
-                          Get AI-generated insights from student feedback using OpenAI
+                          Get AI-generated insights from student feedback using
+                          OpenAI
                         </CardDescription>
                       </div>
                       {!aiAnalysis && !aiLoading && (
                         <Button
                           onClick={handleGenerateAIAnalysis}
-                          disabled={aiLoading || !evaluationData || evaluationData.totalEvaluations === 0}
+                          disabled={
+                            aiLoading ||
+                            !evaluationData ||
+                            evaluationData.totalEvaluations === 0
+                          }
                           className="bg-gradient-to-r from-[#F4991A] to-[#e08915] hover:from-[#e08915] hover:to-[#c77910] text-white shadow-md hover:shadow-lg transition-all"
                         >
                           <Sparkles className="h-4 w-4 mr-2" />
@@ -2003,15 +2102,21 @@ export default function InstructorDashboard() {
                           <div className="animate-spin rounded-full h-16 w-16 border-4 border-[#344F1F]/20 border-t-[#F4991A] mx-auto mb-4"></div>
                           <Brain className="h-8 w-8 text-[#344F1F] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
                         </div>
-                        <p className="text-[#344F1F] font-medium">Analyzing evaluation data...</p>
-                        <p className="text-sm text-black/60 mt-2">This may take a few moments</p>
+                        <p className="text-[#344F1F] font-medium">
+                          Analyzing evaluation data...
+                        </p>
+                        <p className="text-sm text-black/60 mt-2">
+                          This may take a few moments
+                        </p>
                       </div>
                     )}
 
                     {aiError && (
                       <div className="bg-red-50 border-2 border-red-200 rounded-lg p-6 text-center">
                         <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-3" />
-                        <p className="text-red-700 font-medium mb-2">Failed to generate analysis</p>
+                        <p className="text-red-700 font-medium mb-2">
+                          Failed to generate analysis
+                        </p>
                         <p className="text-sm text-red-600">{aiError}</p>
                         <Button
                           onClick={handleGenerateAIAnalysis}
@@ -2029,7 +2134,8 @@ export default function InstructorDashboard() {
                           Ready to generate AI insights
                         </p>
                         <p className="text-sm text-black/60 max-w-md mx-auto">
-                          Click the "Generate Analysis" button to get AI-powered insights from your student evaluations
+                          Click the "Generate Analysis" button to get AI-powered
+                          insights from your student evaluations
                         </p>
                       </div>
                     )}
@@ -2040,104 +2146,152 @@ export default function InstructorDashboard() {
                         <div className="bg-gradient-to-br from-[#344F1F]/5 to-white p-6 rounded-lg border-2 border-[#344F1F]/10">
                           <div className="flex items-center gap-2 mb-3">
                             <Brain className="h-5 w-5 text-[#F4991A]" />
-                            <h3 className="font-bold text-[#344F1F] text-lg">Executive Summary</h3>
+                            <h3 className="font-bold text-[#344F1F] text-lg">
+                              Executive Summary
+                            </h3>
                           </div>
-                          <p className="text-black/80 leading-relaxed">{aiAnalysis.summary}</p>
+                          <p className="text-black/80 leading-relaxed">
+                            {aiAnalysis.summary}
+                          </p>
                         </div>
 
                         {/* Sentiment Analysis */}
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                           <div className="bg-white p-4 rounded-lg border-2 border-gray-200 hover:border-[#F4991A]/30 transition-all">
-                            <p className="text-sm text-black/60 mb-2">Overall Sentiment</p>
+                            <p className="text-sm text-black/60 mb-2">
+                              Overall Sentiment
+                            </p>
                             <div className="flex items-center gap-2">
-                              {aiAnalysis.sentimentAnalysis.overall === 'positive' && (
+                              {aiAnalysis.sentimentAnalysis.overall ===
+                                "positive" && (
                                 <>
                                   <ThumbsUp className="h-5 w-5 text-green-500" />
-                                  <span className="font-bold text-green-600">Positive</span>
+                                  <span className="font-bold text-green-600">
+                                    Positive
+                                  </span>
                                 </>
                               )}
-                              {aiAnalysis.sentimentAnalysis.overall === 'neutral' && (
+                              {aiAnalysis.sentimentAnalysis.overall ===
+                                "neutral" && (
                                 <>
                                   <AlertCircle className="h-5 w-5 text-yellow-500" />
-                                  <span className="font-bold text-yellow-600">Neutral</span>
+                                  <span className="font-bold text-yellow-600">
+                                    Neutral
+                                  </span>
                                 </>
                               )}
-                              {aiAnalysis.sentimentAnalysis.overall === 'negative' && (
+                              {aiAnalysis.sentimentAnalysis.overall ===
+                                "negative" && (
                                 <>
                                   <TrendingDown className="h-5 w-5 text-red-500" />
-                                  <span className="font-bold text-red-600">Negative</span>
+                                  <span className="font-bold text-red-600">
+                                    Negative
+                                  </span>
                                 </>
                               )}
                             </div>
                           </div>
 
                           <div className="bg-white p-4 rounded-lg border-2 border-gray-200">
-                            <p className="text-sm text-black/60 mb-2">Teaching</p>
+                            <p className="text-sm text-black/60 mb-2">
+                              Teaching
+                            </p>
                             <div className="flex items-center gap-2">
-                              {aiAnalysis.sentimentAnalysis.teaching === 'positive' && (
+                              {aiAnalysis.sentimentAnalysis.teaching ===
+                                "positive" && (
                                 <>
                                   <ThumbsUp className="h-5 w-5 text-green-500" />
-                                  <span className="font-bold text-green-600">Positive</span>
+                                  <span className="font-bold text-green-600">
+                                    Positive
+                                  </span>
                                 </>
                               )}
-                              {aiAnalysis.sentimentAnalysis.teaching === 'neutral' && (
+                              {aiAnalysis.sentimentAnalysis.teaching ===
+                                "neutral" && (
                                 <>
                                   <AlertCircle className="h-5 w-5 text-yellow-500" />
-                                  <span className="font-bold text-yellow-600">Neutral</span>
+                                  <span className="font-bold text-yellow-600">
+                                    Neutral
+                                  </span>
                                 </>
                               )}
-                              {aiAnalysis.sentimentAnalysis.teaching === 'negative' && (
+                              {aiAnalysis.sentimentAnalysis.teaching ===
+                                "negative" && (
                                 <>
                                   <TrendingDown className="h-5 w-5 text-red-500" />
-                                  <span className="font-bold text-red-600">Negative</span>
+                                  <span className="font-bold text-red-600">
+                                    Negative
+                                  </span>
                                 </>
                               )}
                             </div>
                           </div>
 
                           <div className="bg-white p-4 rounded-lg border-2 border-gray-200">
-                            <p className="text-sm text-black/60 mb-2">Materials</p>
+                            <p className="text-sm text-black/60 mb-2">
+                              Materials
+                            </p>
                             <div className="flex items-center gap-2">
-                              {aiAnalysis.sentimentAnalysis.materials === 'positive' && (
+                              {aiAnalysis.sentimentAnalysis.materials ===
+                                "positive" && (
                                 <>
                                   <ThumbsUp className="h-5 w-5 text-green-500" />
-                                  <span className="font-bold text-green-600">Positive</span>
+                                  <span className="font-bold text-green-600">
+                                    Positive
+                                  </span>
                                 </>
                               )}
-                              {aiAnalysis.sentimentAnalysis.materials === 'neutral' && (
+                              {aiAnalysis.sentimentAnalysis.materials ===
+                                "neutral" && (
                                 <>
                                   <AlertCircle className="h-5 w-5 text-yellow-500" />
-                                  <span className="font-bold text-yellow-600">Neutral</span>
+                                  <span className="font-bold text-yellow-600">
+                                    Neutral
+                                  </span>
                                 </>
                               )}
-                              {aiAnalysis.sentimentAnalysis.materials === 'negative' && (
+                              {aiAnalysis.sentimentAnalysis.materials ===
+                                "negative" && (
                                 <>
                                   <TrendingDown className="h-5 w-5 text-red-500" />
-                                  <span className="font-bold text-red-600">Negative</span>
+                                  <span className="font-bold text-red-600">
+                                    Negative
+                                  </span>
                                 </>
                               )}
                             </div>
                           </div>
 
                           <div className="bg-white p-4 rounded-lg border-2 border-gray-200">
-                            <p className="text-sm text-black/60 mb-2">Communication</p>
+                            <p className="text-sm text-black/60 mb-2">
+                              Communication
+                            </p>
                             <div className="flex items-center gap-2">
-                              {aiAnalysis.sentimentAnalysis.communication === 'positive' && (
+                              {aiAnalysis.sentimentAnalysis.communication ===
+                                "positive" && (
                                 <>
                                   <ThumbsUp className="h-5 w-5 text-green-500" />
-                                  <span className="font-bold text-green-600">Positive</span>
+                                  <span className="font-bold text-green-600">
+                                    Positive
+                                  </span>
                                 </>
                               )}
-                              {aiAnalysis.sentimentAnalysis.communication === 'neutral' && (
+                              {aiAnalysis.sentimentAnalysis.communication ===
+                                "neutral" && (
                                 <>
                                   <AlertCircle className="h-5 w-5 text-yellow-500" />
-                                  <span className="font-bold text-yellow-600">Neutral</span>
+                                  <span className="font-bold text-yellow-600">
+                                    Neutral
+                                  </span>
                                 </>
                               )}
-                              {aiAnalysis.sentimentAnalysis.communication === 'negative' && (
+                              {aiAnalysis.sentimentAnalysis.communication ===
+                                "negative" && (
                                 <>
                                   <TrendingDown className="h-5 w-5 text-red-500" />
-                                  <span className="font-bold text-red-600">Negative</span>
+                                  <span className="font-bold text-red-600">
+                                    Negative
+                                  </span>
                                 </>
                               )}
                             </div>
@@ -2148,13 +2302,20 @@ export default function InstructorDashboard() {
                         <div className="bg-green-50 p-6 rounded-lg border-2 border-green-200">
                           <div className="flex items-center gap-2 mb-4">
                             <ThumbsUp className="h-5 w-5 text-green-600" />
-                            <h3 className="font-bold text-green-800 text-lg">Key Strengths</h3>
+                            <h3 className="font-bold text-green-800 text-lg">
+                              Key Strengths
+                            </h3>
                           </div>
                           <ul className="space-y-2">
                             {aiAnalysis.strengths.map((strength, index) => (
-                              <li key={index} className="flex items-start gap-2">
+                              <li
+                                key={index}
+                                className="flex items-start gap-2"
+                              >
                                 <span className="text-green-600 mt-1">✓</span>
-                                <span className="text-green-900">{strength}</span>
+                                <span className="text-green-900">
+                                  {strength}
+                                </span>
                               </li>
                             ))}
                           </ul>
@@ -2164,15 +2325,26 @@ export default function InstructorDashboard() {
                         <div className="bg-orange-50 p-6 rounded-lg border-2 border-orange-200">
                           <div className="flex items-center gap-2 mb-4">
                             <AlertCircle className="h-5 w-5 text-orange-600" />
-                            <h3 className="font-bold text-orange-800 text-lg">Areas for Improvement</h3>
+                            <h3 className="font-bold text-orange-800 text-lg">
+                              Areas for Improvement
+                            </h3>
                           </div>
                           <ul className="space-y-2">
-                            {aiAnalysis.areasForImprovement.map((area, index) => (
-                              <li key={index} className="flex items-start gap-2">
-                                <span className="text-orange-600 mt-1">→</span>
-                                <span className="text-orange-900">{area}</span>
-                              </li>
-                            ))}
+                            {aiAnalysis.areasForImprovement.map(
+                              (area, index) => (
+                                <li
+                                  key={index}
+                                  className="flex items-start gap-2"
+                                >
+                                  <span className="text-orange-600 mt-1">
+                                    →
+                                  </span>
+                                  <span className="text-orange-900">
+                                    {area}
+                                  </span>
+                                </li>
+                              )
+                            )}
                           </ul>
                         </div>
 
@@ -2180,15 +2352,24 @@ export default function InstructorDashboard() {
                         <div className="bg-blue-50 p-6 rounded-lg border-2 border-blue-200">
                           <div className="flex items-center gap-2 mb-4">
                             <Lightbulb className="h-5 w-5 text-blue-600" />
-                            <h3 className="font-bold text-blue-800 text-lg">Actionable Recommendations</h3>
+                            <h3 className="font-bold text-blue-800 text-lg">
+                              Actionable Recommendations
+                            </h3>
                           </div>
                           <ul className="space-y-2">
-                            {aiAnalysis.recommendations.map((recommendation, index) => (
-                              <li key={index} className="flex items-start gap-2">
-                                <span className="text-blue-600 mt-1">💡</span>
-                                <span className="text-blue-900">{recommendation}</span>
-                              </li>
-                            ))}
+                            {aiAnalysis.recommendations.map(
+                              (recommendation, index) => (
+                                <li
+                                  key={index}
+                                  className="flex items-start gap-2"
+                                >
+                                  <span className="text-blue-600 mt-1">💡</span>
+                                  <span className="text-blue-900">
+                                    {recommendation}
+                                  </span>
+                                </li>
+                              )
+                            )}
                           </ul>
                         </div>
 
@@ -2196,7 +2377,9 @@ export default function InstructorDashboard() {
                         <div className="bg-purple-50 p-6 rounded-lg border-2 border-purple-200">
                           <div className="flex items-center gap-2 mb-4">
                             <Brain className="h-5 w-5 text-purple-600" />
-                            <h3 className="font-bold text-purple-800 text-lg">Key Themes Identified</h3>
+                            <h3 className="font-bold text-purple-800 text-lg">
+                              Key Themes Identified
+                            </h3>
                           </div>
                           <div className="flex flex-wrap gap-2">
                             {aiAnalysis.keyThemes.map((theme, index) => (
@@ -2214,7 +2397,8 @@ export default function InstructorDashboard() {
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center">
                           <p className="text-xs text-gray-600 italic">
                             <AlertCircle className="h-3 w-3 inline mr-1" />
-                            AI-generated analysis is provided as guidance. Please review with your own professional judgment.
+                            AI-generated analysis is provided as guidance.
+                            Please review with your own professional judgment.
                           </p>
                         </div>
                       </div>

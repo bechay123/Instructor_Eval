@@ -52,11 +52,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const fetchUserProfile = async (authUser: any) => {
       console.log("🟡 fetchUserProfile: Starting, mounted =", mounted);
       if (!mounted) {
-        console.log("🔴 fetchUserProfile: Component unmounted, skipping profile fetch");
+        console.log(
+          "🔴 fetchUserProfile: Component unmounted, skipping profile fetch"
+        );
         return;
       }
 
-      console.log("🟡 fetchUserProfile: Fetching profile for user:", authUser.id);
+      console.log(
+        "🟡 fetchUserProfile: Fetching profile for user:",
+        authUser.id
+      );
       setLoadingMessage("Loading your profile...", "Please wait");
       console.log("🟡 fetchUserProfile: Loading message set");
 
@@ -65,28 +70,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         console.log("🟡 fetchUserProfile: Query details:", {
           userId: authUser.id,
           table: "profiles",
-          fields: "role, first_name, last_name, status, is_active"
+          fields: "role, first_name, last_name, status, is_active",
         });
-        
+
         // Add timeout to catch hanging queries
         const queryPromise = supabase
           .from("profiles")
           .select("role, first_name, last_name, status, is_active")
           .eq("id", authUser.id)
           .single();
-        
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Query timeout after 5 seconds')), 5000)
+
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(
+            () => reject(new Error("Query timeout after 5 seconds")),
+            5000
+          )
         );
-        
+
         console.log("🟡 fetchUserProfile: Waiting for query response...");
-        const { data: profile, error: profileError } = await Promise.race([
+        const { data: profile, error: profileError } = (await Promise.race([
           queryPromise,
-          timeoutPromise
-        ]) as any;
+          timeoutPromise,
+        ])) as any;
 
         console.log("🟡 fetchUserProfile: Query completed, mounted =", mounted);
-        console.log("🟡 fetchUserProfile: RAW RESPONSE:", { data: profile, error: profileError });
+        console.log("🟡 fetchUserProfile: RAW RESPONSE:", {
+          data: profile,
+          error: profileError,
+        });
 
         if (!mounted) {
           console.log(
@@ -106,8 +117,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
 
         if (profileError) {
-          console.error("🔴 fetchUserProfile: Profile fetch error:", profileError.message);
-          console.error("🔴 fetchUserProfile: Full error object:", profileError);
+          console.error(
+            "🔴 fetchUserProfile: Profile fetch error:",
+            profileError.message
+          );
+          console.error(
+            "🔴 fetchUserProfile: Full error object:",
+            profileError
+          );
           console.log("🔴 fetchUserProfile: Setting user to null");
           setUser(null);
           return;
@@ -115,8 +132,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         console.log("🟡 fetchUserProfile: Checking profile approval status...");
         console.log("🟡 fetchUserProfile: profile.status =", profile?.status);
-        console.log("🟡 fetchUserProfile: profile.is_active =", profile?.is_active);
-        
+        console.log(
+          "🟡 fetchUserProfile: profile.is_active =",
+          profile?.is_active
+        );
+
         if (profile && profile.status === "approved" && profile.is_active) {
           console.log("🟢 fetchUserProfile: Profile approved and active");
           const userData = {
@@ -130,16 +150,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setUser(userData);
           console.log("🟢 fetchUserProfile: User data set successfully");
         } else {
-          console.log("🔴 fetchUserProfile: Profile not approved or not active, profile:", profile);
-          console.log("🔴 fetchUserProfile: Setting user to null and signing out");
+          console.log(
+            "🔴 fetchUserProfile: Profile not approved or not active, profile:",
+            profile
+          );
+          console.log(
+            "🔴 fetchUserProfile: Setting user to null and signing out"
+          );
           setUser(null);
           await supabase.auth.signOut();
           console.log("🔴 fetchUserProfile: Signed out");
         }
       } catch (error) {
-        console.error("🔴 fetchUserProfile: Exception during profile fetch:", error);
+        console.error(
+          "🔴 fetchUserProfile: Exception during profile fetch:",
+          error
+        );
         if (mounted) {
-          console.log("🔴 fetchUserProfile: Setting user to null due to exception");
+          console.log(
+            "🔴 fetchUserProfile: Setting user to null due to exception"
+          );
           setUser(null);
         }
       }
@@ -158,7 +188,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           data: { session: initialSession },
         } = await supabase.auth.getSession();
 
-        console.log("🟠 getInitialSession: getSession completed, mounted =", mounted);
+        console.log(
+          "🟠 getInitialSession: getSession completed, mounted =",
+          mounted
+        );
         console.log("🟠 getInitialSession: Has session?", !!initialSession);
         console.log("🟠 getInitialSession: Session details:", {
           hasSession: !!initialSession,
@@ -168,11 +201,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
 
         if (!mounted) {
-          console.log("🔴 getInitialSession: Component unmounted, but will still update initializing state");
+          console.log(
+            "🔴 getInitialSession: Component unmounted, but will still update initializing state"
+          );
         }
 
         if (initialSession?.user && mounted) {
-          console.log("🟢 getInitialSession: Initial session found, user ID:", initialSession.user.id);
+          console.log(
+            "🟢 getInitialSession: Initial session found, user ID:",
+            initialSession.user.id
+          );
           console.log("🟠 getInitialSession: Calling fetchUserProfile...");
           await fetchUserProfile(initialSession.user);
           console.log("🟠 getInitialSession: fetchUserProfile completed");
@@ -182,16 +220,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setUser(null);
         }
       } catch (error) {
-        console.error("🔴 getInitialSession: Error getting initial session:", error);
+        console.error(
+          "🔴 getInitialSession: Error getting initial session:",
+          error
+        );
         if (mounted) {
-          console.log("🔴 getInitialSession: Setting user to null due to error");
+          console.log(
+            "🔴 getInitialSession: Setting user to null due to error"
+          );
           setUser(null);
         }
       } finally {
         // ALWAYS set initializing to false, even if unmounted
         // This is safe because React will batch state updates
         console.log("🟠 getInitialSession: Finally block, mounted =", mounted);
-        console.log("🟢 getInitialSession: Setting initializing to false (regardless of mount state)");
+        console.log(
+          "🟢 getInitialSession: Setting initializing to false (regardless of mount state)"
+        );
         setInitializing(false);
         console.log("🟢 getInitialSession: Hiding loading UI");
         hideLoading();
@@ -207,22 +252,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("🟣 onAuthStateChange: Event received:", event, "| Has session:", !!session);
+      console.log(
+        "🟣 onAuthStateChange: Event received:",
+        event,
+        "| Has session:",
+        !!session
+      );
       console.log("🟣 onAuthStateChange: mounted =", mounted);
 
       if (!mounted) {
-        console.log("🔴 onAuthStateChange: Component unmounted, ignoring event");
+        console.log(
+          "🔴 onAuthStateChange: Component unmounted, ignoring event"
+        );
         return;
       }
 
       // Skip if this is during initial setup
       if (event === "INITIAL_SESSION") {
-        console.log("🟣 onAuthStateChange: Skipping INITIAL_SESSION event (already handled)");
+        console.log(
+          "🟣 onAuthStateChange: Skipping INITIAL_SESSION event (already handled)"
+        );
         return;
       }
 
       if (session?.user) {
-        console.log("🟢 onAuthStateChange: Session user found, user ID:", session.user.id);
+        console.log(
+          "🟢 onAuthStateChange: Session user found, user ID:",
+          session.user.id
+        );
         console.log("🟣 onAuthStateChange: Showing loading UI");
         showLoading("Loading profile...", "Please wait");
         console.log("🟣 onAuthStateChange: Calling fetchUserProfile...");
