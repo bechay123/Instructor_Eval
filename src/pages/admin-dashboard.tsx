@@ -51,10 +51,10 @@ import {
 } from "@/components/ui/select";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/supabase-client";
-import { 
-  getAllActivityLogs, 
-  getActivityLogStats, 
-  type ActivityLog 
+import {
+  getAllActivityLogs,
+  getActivityLogStats,
+  type ActivityLog,
 } from "@/services/activity-logs-service";
 
 interface User {
@@ -409,7 +409,10 @@ export default function AdminDashboard() {
   const loadActivityLogs = async () => {
     try {
       setActivityLogsLoading(true);
-      const filters = activityFilterType === "all" ? {} : { activityType: activityFilterType as any };
+      const filters =
+        activityFilterType === "all"
+          ? {}
+          : { activityType: activityFilterType as any };
       const { data, error } = await getAllActivityLogs(filters);
 
       if (error) {
@@ -710,12 +713,12 @@ export default function AdminDashboard() {
           onValueChange={setActiveTab}
           className="space-y-6"
         >
-          <TabsList className="bg-white border-[#344F1F]/20 flex-wrap h-auto gap-2 p-2">
+          <TabsList className="bg-white shadow-md border-[#344F1F]/20 flex-wrap h-auto gap-2 p-2 rounded-lg">
             <TabsTrigger
               value="overview"
               currentValue={activeTab}
               onValueChange={setActiveTab}
-              className="text-xs sm:text-sm"
+              className="text-xs sm:text-sm data-[state=active]:bg-[#344F1F] data-[state=active]:text-[#F2EAD3] data-[state=active]:shadow-lg transition-all"
             >
               Overview
             </TabsTrigger>
@@ -723,7 +726,7 @@ export default function AdminDashboard() {
               value="pending"
               currentValue={activeTab}
               onValueChange={setActiveTab}
-              className="relative text-xs sm:text-sm"
+              className="relative text-xs sm:text-sm data-[state=active]:bg-[#344F1F] data-[state=active]:text-[#F2EAD3] data-[state=active]:shadow-lg transition-all"
             >
               <span className="hidden sm:inline">Pending Requests</span>
               <span className="sm:hidden">Pending</span>
@@ -737,7 +740,7 @@ export default function AdminDashboard() {
               value="users"
               currentValue={activeTab}
               onValueChange={setActiveTab}
-              className="text-xs sm:text-sm"
+              className="text-xs sm:text-sm data-[state=active]:bg-[#344F1F] data-[state=active]:text-[#F2EAD3] data-[state=active]:shadow-lg transition-all"
             >
               <span className="hidden sm:inline">Manage Users</span>
               <span className="sm:hidden">Users</span>
@@ -746,7 +749,7 @@ export default function AdminDashboard() {
               value="courses"
               currentValue={activeTab}
               onValueChange={setActiveTab}
-              className="text-xs sm:text-sm"
+              className="text-xs sm:text-sm data-[state=active]:bg-[#344F1F] data-[state=active]:text-[#F2EAD3] data-[state=active]:shadow-lg transition-all"
             >
               <span className="hidden sm:inline">Manage Courses</span>
               <span className="sm:hidden">Courses</span>
@@ -755,7 +758,7 @@ export default function AdminDashboard() {
               value="activity-logs"
               currentValue={activeTab}
               onValueChange={setActiveTab}
-              className="text-xs sm:text-sm"
+              className="text-xs sm:text-sm data-[state=active]:bg-[#344F1F] data-[state=active]:text-[#F2EAD3] data-[state=active]:shadow-lg transition-all"
             >
               <span className="hidden sm:inline">Activity Logs</span>
               <span className="sm:hidden">Logs</span>
@@ -909,11 +912,21 @@ export default function AdminDashboard() {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="whitespace-nowrap">User</TableHead>
-                          <TableHead className="whitespace-nowrap">Email</TableHead>
-                          <TableHead className="whitespace-nowrap">Role</TableHead>
-                          <TableHead className="whitespace-nowrap">Requested Date</TableHead>
-                          <TableHead className="whitespace-nowrap">Actions</TableHead>
+                          <TableHead className="whitespace-nowrap">
+                            User
+                          </TableHead>
+                          <TableHead className="whitespace-nowrap">
+                            Email
+                          </TableHead>
+                          <TableHead className="whitespace-nowrap">
+                            Role
+                          </TableHead>
+                          <TableHead className="whitespace-nowrap">
+                            Requested Date
+                          </TableHead>
+                          <TableHead className="whitespace-nowrap">
+                            Actions
+                          </TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -932,7 +945,9 @@ export default function AdminDashboard() {
                                 </span>
                               </div>
                             </TableCell>
-                            <TableCell className="whitespace-nowrap">{user.email}</TableCell>
+                            <TableCell className="whitespace-nowrap">
+                              {user.email}
+                            </TableCell>
                             <TableCell>{getRoleBadge(user.role)}</TableCell>
                             <TableCell className="whitespace-nowrap">
                               {new Date(user.created_at).toLocaleDateString()}
@@ -945,7 +960,9 @@ export default function AdminDashboard() {
                                   className="bg-green-600 hover:bg-green-700 text-white"
                                 >
                                   <CheckCircle className="h-4 w-4 mr-1" />
-                                  <span className="hidden sm:inline">Approve</span>
+                                  <span className="hidden sm:inline">
+                                    Approve
+                                  </span>
                                 </Button>
                                 <Button
                                   size="sm"
@@ -953,14 +970,16 @@ export default function AdminDashboard() {
                                   onClick={() => rejectUser(user.id)}
                                 >
                                   <XCircle className="h-4 w-4 mr-1" />
-                                  <span className="hidden sm:inline">Reject</span>
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                                  <span className="hidden sm:inline">
+                                    Reject
+                                  </span>
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </div>
                 )}
               </CardContent>
@@ -1021,12 +1040,24 @@ export default function AdminDashboard() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="whitespace-nowrap">User</TableHead>
-                        <TableHead className="whitespace-nowrap">Email</TableHead>
-                        <TableHead className="whitespace-nowrap">Role</TableHead>
-                        <TableHead className="whitespace-nowrap">Status</TableHead>
-                        <TableHead className="whitespace-nowrap">Join Date</TableHead>
-                        <TableHead className="whitespace-nowrap">Actions</TableHead>
+                        <TableHead className="whitespace-nowrap">
+                          User
+                        </TableHead>
+                        <TableHead className="whitespace-nowrap">
+                          Email
+                        </TableHead>
+                        <TableHead className="whitespace-nowrap">
+                          Role
+                        </TableHead>
+                        <TableHead className="whitespace-nowrap">
+                          Status
+                        </TableHead>
+                        <TableHead className="whitespace-nowrap">
+                          Join Date
+                        </TableHead>
+                        <TableHead className="whitespace-nowrap">
+                          Actions
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -1045,7 +1076,9 @@ export default function AdminDashboard() {
                               </span>
                             </div>
                           </TableCell>
-                          <TableCell className="whitespace-nowrap">{user.email}</TableCell>
+                          <TableCell className="whitespace-nowrap">
+                            {user.email}
+                          </TableCell>
                           <TableCell>{getRoleBadge(user.role)}</TableCell>
                           <TableCell>{getStatusBadge(user.status)}</TableCell>
                           <TableCell className="whitespace-nowrap">
@@ -1068,12 +1101,16 @@ export default function AdminDashboard() {
                                 {user.status === "suspended" ? (
                                   <>
                                     <CheckCircle className="h-4 w-4 sm:mr-1" />
-                                    <span className="hidden sm:inline">Reactivate</span>
+                                    <span className="hidden sm:inline">
+                                      Reactivate
+                                    </span>
                                   </>
                                 ) : (
                                   <>
                                     <UserX className="h-4 w-4 sm:mr-1" />
-                                    <span className="hidden sm:inline">Suspend</span>
+                                    <span className="hidden sm:inline">
+                                      Suspend
+                                    </span>
                                   </>
                                 )}
                               </Button>
@@ -1589,7 +1626,8 @@ export default function AdminDashboard() {
                       Activity Logs
                     </CardTitle>
                     <CardDescription>
-                      Monitor all user activities, admin actions, and system events
+                      Monitor all user activities, admin actions, and system
+                      events
                     </CardDescription>
                   </div>
                   <Select
@@ -1601,19 +1639,45 @@ export default function AdminDashboard() {
                     </SelectTrigger>
                     <SelectContent className="bg-white">
                       <SelectItem value="all">All Activities</SelectItem>
-                      <SelectItem value="user_registered">User Registrations</SelectItem>
-                      <SelectItem value="user_approved">User Approvals</SelectItem>
-                      <SelectItem value="user_suspended">User Suspensions</SelectItem>
-                      <SelectItem value="user_reactivated">User Reactivations</SelectItem>
-                      <SelectItem value="instant_setup_request">Instant Setup Requests</SelectItem>
-                      <SelectItem value="student_enrolled">Student Enrollments (Self)</SelectItem>
-                      <SelectItem value="instructor_added_student">Instructor Added Student</SelectItem>
-                      <SelectItem value="evaluation_submitted">Evaluation Submissions</SelectItem>
-                      <SelectItem value="ai_analysis_requested">AI Analysis Requests</SelectItem>
-                      <SelectItem value="profile_updated">Profile Updates</SelectItem>
-                      <SelectItem value="course_created">Course Created</SelectItem>
-                      <SelectItem value="course_updated">Course Updated</SelectItem>
-                      <SelectItem value="course_deleted">Course Deleted</SelectItem>
+                      <SelectItem value="user_registered">
+                        User Registrations
+                      </SelectItem>
+                      <SelectItem value="user_approved">
+                        User Approvals
+                      </SelectItem>
+                      <SelectItem value="user_suspended">
+                        User Suspensions
+                      </SelectItem>
+                      <SelectItem value="user_reactivated">
+                        User Reactivations
+                      </SelectItem>
+                      <SelectItem value="instant_setup_request">
+                        Instant Setup Requests
+                      </SelectItem>
+                      <SelectItem value="student_enrolled">
+                        Student Enrollments (Self)
+                      </SelectItem>
+                      <SelectItem value="instructor_added_student">
+                        Instructor Added Student
+                      </SelectItem>
+                      <SelectItem value="evaluation_submitted">
+                        Evaluation Submissions
+                      </SelectItem>
+                      <SelectItem value="ai_analysis_requested">
+                        AI Analysis Requests
+                      </SelectItem>
+                      <SelectItem value="profile_updated">
+                        Profile Updates
+                      </SelectItem>
+                      <SelectItem value="course_created">
+                        Course Created
+                      </SelectItem>
+                      <SelectItem value="course_updated">
+                        Course Updated
+                      </SelectItem>
+                      <SelectItem value="course_deleted">
+                        Course Deleted
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -1657,15 +1721,18 @@ export default function AdminDashboard() {
                                   ? "bg-red-100 text-red-800"
                                   : log.activity_type === "user_reactivated"
                                   ? "bg-purple-100 text-purple-800"
-                                  : log.activity_type === "instant_setup_request"
+                                  : log.activity_type ===
+                                    "instant_setup_request"
                                   ? "bg-orange-100 text-orange-800"
                                   : log.activity_type === "student_enrolled"
                                   ? "bg-cyan-100 text-cyan-800"
-                                  : log.activity_type === "instructor_added_student"
+                                  : log.activity_type ===
+                                    "instructor_added_student"
                                   ? "bg-teal-100 text-teal-800"
                                   : log.activity_type === "evaluation_submitted"
                                   ? "bg-indigo-100 text-indigo-800"
-                                  : log.activity_type === "ai_analysis_requested"
+                                  : log.activity_type ===
+                                    "ai_analysis_requested"
                                   ? "bg-fuchsia-100 text-fuchsia-800"
                                   : log.activity_type === "profile_updated"
                                   ? "bg-lime-100 text-lime-800"
@@ -1678,18 +1745,16 @@ export default function AdminDashboard() {
                                   : "bg-gray-100 text-gray-800"
                               }
                             >
-                              {log.activity_type.replace(/_/g, " ").toUpperCase()}
+                              {log.activity_type
+                                .replace(/_/g, " ")
+                                .toUpperCase()}
                             </Badge>
                           </TableCell>
                           <TableCell>{log.activity_description}</TableCell>
-                          <TableCell>
-                            {log.user_email || "N/A"}
-                          </TableCell>
+                          <TableCell>{log.user_email || "N/A"}</TableCell>
                           <TableCell>
                             {log.user_role ? (
-                              <Badge variant="outline">
-                                {log.user_role}
-                              </Badge>
+                              <Badge variant="outline">{log.user_role}</Badge>
                             ) : (
                               "N/A"
                             )}
@@ -1701,7 +1766,10 @@ export default function AdminDashboard() {
                                   {log.performed_by_email}
                                 </span>
                                 {log.performed_by_role && (
-                                  <Badge variant="secondary" className="w-fit mt-1">
+                                  <Badge
+                                    variant="secondary"
+                                    className="w-fit mt-1"
+                                  >
                                     {log.performed_by_role}
                                   </Badge>
                                 )}
