@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/supabase-client";
+import { BilingualComment } from "@/components/bilingual-comment";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -85,6 +86,14 @@ interface EvaluationData {
     materials_comments: string;
     communication_comments: string;
     general_comments: string;
+    teaching_comments_original?: string;
+    teaching_comments_language?: string;
+    materials_comments_original?: string;
+    materials_comments_language?: string;
+    communication_comments_original?: string;
+    communication_comments_language?: string;
+    general_comments_original?: string;
+    general_comments_language?: string;
   }>;
   detailedRatings: {
     teaching_clarity: number[];
@@ -1942,105 +1951,36 @@ export default function InstructorDashboard() {
                           className="p-4 bg-white rounded-lg border-2 border-[#344F1F]/20 shadow-sm divide-y divide-[#344F1F]/10"
                         >
                           {comment.teaching_comments && (
-                            <div className="py-3">
-                              <p className="text-base font-bold text-[#344F1F] text-left">
-                                Teaching
-                              </p>
-                              <p className="text-sm text-black/80 whitespace-pre-wrap break-words text-justify">
-                                {comment.teaching_comments}
-                              </p>
-                            </div>
+                            <BilingualComment
+                              title="Teaching"
+                              translatedText={comment.teaching_comments}
+                              originalText={comment.teaching_comments_original}
+                              languageCode={comment.teaching_comments_language}
+                            />
                           )}
                           {comment.materials_comments && (
-                            <div className="py-3">
-                              <p className="text-base font-bold text-[#344F1F] text-left">
-                                Materials
-                              </p>
-                              <p className="text-sm text-black/80 whitespace-pre-wrap break-words text-justify">
-                                {comment.materials_comments}
-                              </p>
-                            </div>
+                            <BilingualComment
+                              title="Materials"
+                              translatedText={comment.materials_comments}
+                              originalText={comment.materials_comments_original}
+                              languageCode={comment.materials_comments_language}
+                            />
                           )}
                           {comment.communication_comments && (
-                            <div className="py-3">
-                              <p className="text-base font-bold text-[#344F1F] text-left">
-                                Communication
-                              </p>
-                              <p className="text-sm text-black/80 whitespace-pre-wrap break-words text-justify">
-                                {comment.communication_comments}
-                              </p>
-                            </div>
+                            <BilingualComment
+                              title="Communication"
+                              translatedText={comment.communication_comments}
+                              originalText={comment.communication_comments_original}
+                              languageCode={comment.communication_comments_language}
+                            />
                           )}
                           {comment.general_comments && (
-                            <div className="py-3">
-                              <p className="text-base font-bold text-[#344F1F] text-left">
-                                General
-                              </p>
-                              <p className="text-sm text-black/80 whitespace-pre-wrap break-words text-justify">
-                                {(() => {
-                                  const text = comment.general_comments || "";
-                                  if (!text.trim()) {
-                                    return (
-                                      <span className="text-black/60">
-                                        No responses provided.
-                                      </span>
-                                    );
-                                  }
-                                  const lines = text.split("\n");
-                                  const labels = [
-                                    "Learning Experiences:",
-                                    "Relevant Requirements:",
-                                    "Recommendation:",
-                                    "Recommendation (",
-                                  ];
-                                  return lines.map((line, i) => {
-                                    const trimmed = line.trim();
-                                    const label = labels.find((l) =>
-                                      trimmed.startsWith(l)
-                                    );
-                                    if (label) {
-                                      const after = line.substring(
-                                        line.indexOf(label) + label.length
-                                      );
-                                      const afterTrim = after.trim();
-                                      const isRecommendation = label
-                                        .toLowerCase()
-                                        .startsWith("recommend");
-                                      return (
-                                        <span key={i}>
-                                          <span className="font-semibold">
-                                            {label}
-                                          </span>
-                                          {afterTrim ? (
-                                            isRecommendation ? (
-                                              <span className="text-lg font-bold text-[#F4991A] ml-1">
-                                                {afterTrim}
-                                              </span>
-                                            ) : (
-                                              <span>{after}</span>
-                                            )
-                                          ) : (
-                                            <span className="text-black/60">
-                                              {" "}
-                                              No response provided.
-                                            </span>
-                                          )}
-                                          {i < lines.length - 1 ? <br /> : null}
-                                        </span>
-                                      );
-                                    }
-                                    // If the line is empty, render a line break to preserve spacing
-                                    if (!trimmed) return <br key={i} />;
-                                    return (
-                                      <span key={i}>
-                                        {line}
-                                        {i < lines.length - 1 ? <br /> : null}
-                                      </span>
-                                    );
-                                  });
-                                })()}
-                              </p>
-                            </div>
+                            <BilingualComment
+                              title="General"
+                              translatedText={comment.general_comments}
+                              originalText={comment.general_comments_original}
+                              languageCode={comment.general_comments_language}
+                            />
                           )}
                         </div>
                       ))

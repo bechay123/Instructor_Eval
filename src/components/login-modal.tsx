@@ -79,34 +79,15 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
       console.log("Login successful, redirecting to:", userRole);
 
-      // Redirect based on role
-      let redirectPath = "/";
-      switch (userRole) {
-        case "admin":
-          redirectPath = "/admin-dashboard";
-          break;
-        case "instructor":
-          redirectPath = "/instructor-dashboard";
-          break;
-        case "student":
-          redirectPath = "/student-dashboard";
-          break;
-        default:
-          setError("Invalid role");
-          setIsLoading(false);
-          return;
-      }
-
-      console.log("Navigating to:", redirectPath);
-
       // Close modal and clear form first
       onClose();
       setLoginEmail("");
       setPassword("");
-
-      // Wait a bit for auth state to settle, then navigate
+      
+      // Navigate to landing page first, then let ProtectedRoute redirect to proper dashboard
+      // This prevents the flash of landing page after successful login
       setTimeout(() => {
-        navigate(redirectPath);
+        navigate("/");
         setIsLoading(false);
       }, 300);
     } catch (err: any) {

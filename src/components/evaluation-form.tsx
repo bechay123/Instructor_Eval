@@ -1,12 +1,15 @@
 "use client"
 
 import { useState } from "react"
-import { ArrowLeft, Star, Send } from "lucide-react"
+import { ArrowLeft, Star, Send, Languages } from "lucide-react"
 import { Button } from "./ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
 import { Textarea } from "./ui/textarea"
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group"
 import { Label } from "./ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
+import { languages, placeholders, uiText, type SupportedLanguage, translateToEnglish } from "../lib/translator"
+import { checkProfanity, getProfanityErrorMessage } from "../lib/profanity-filter"
 
 interface EvaluationFormProps {
   instructor: {
@@ -97,19 +100,60 @@ export function EvaluationForm({ instructor, onClose }: EvaluationFormProps) {
 
   const [currentSection, setCurrentSection] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [selectedLanguage, setSelectedLanguage] = useState<SupportedLanguage>('en')
   const sections = ["Teaching Effectiveness", "Learning Materials", "Communication & Accessibility"]
 
   const handleRatingChange = (key: keyof EvaluationData, value: number) => {
     setEvaluationData((prev) => ({ ...prev, [key]: value }))
   }
 
-  const handleCommentChange = (key: keyof EvaluationData, value: string) => {
-    setEvaluationData((prev) => ({ ...prev, [key]: value }))
+  const handleCommentChange = (field: keyof EvaluationData, value: string) => {
+    // Check for profanity before updating
+    const profanityCheck = checkProfanity(value, selectedLanguage);
+    
+    if (profanityCheck.isProfane) {
+      alert(getProfanityErrorMessage(selectedLanguage));
+      return; // Don't update the field
+    }
+    
+    setEvaluationData((prev) => ({ ...prev, [field]: value }))
   }
 
   const handleSubmit = async () => {
     setIsSubmitting(true)
     try {
+      // Final profanity check before submission
+      const commentsToCheck = [
+        { field: 'teaching_comments', value: evaluationData.teaching_comments },
+        { field: 'materials_comments', value: evaluationData.materials_comments },
+        { field: 'communication_comments', value: evaluationData.communication_comments },
+        { field: 'general_comments', value: evaluationData.general_comments }
+      ];
+
+      for (const comment of commentsToCheck) {
+        if (comment.value.trim()) {
+          const profanityCheck = checkProfanity(comment.value, selectedLanguage);
+          if (profanityCheck.isProfane) {
+            alert(`${getProfanityErrorMessage(selectedLanguage)}\n\nProblematic words detected: ${profanityCheck.matchedWords.slice(0, 3).join(', ')}`);
+            setIsSubmitting(false);
+            return;
+          }
+        }
+      }
+
+      // Translate all comments to English
+      const [
+        teachingTranslated,
+        materialsTranslated,
+        communicationTranslated,
+        generalTranslated
+      ] = await Promise.all([
+        translateToEnglish(evaluationData.teaching_comments, selectedLanguage),
+        translateToEnglish(evaluationData.materials_comments, selectedLanguage),
+        translateToEnglish(evaluationData.communication_comments, selectedLanguage),
+        translateToEnglish(evaluationData.general_comments, selectedLanguage)
+      ]);
+
       const response = await fetch("/api/submit-evaluation", {
         method: "POST",
         headers: {
@@ -119,6 +163,20 @@ export function EvaluationForm({ instructor, onClose }: EvaluationFormProps) {
           instructor_id: instructor.id,
           instructor_name: instructor.name,
           ...evaluationData,
+          // Store translated versions in main columns
+          teaching_comments: teachingTranslated,
+          materials_comments: materialsTranslated,
+          communication_comments: communicationTranslated,
+          general_comments: generalTranslated,
+          // Store original versions and language codes
+          teaching_comments_original: evaluationData.teaching_comments,
+          teaching_comments_language: selectedLanguage,
+          materials_comments_original: evaluationData.materials_comments,
+          materials_comments_language: selectedLanguage,
+          communication_comments_original: evaluationData.communication_comments,
+          communication_comments_language: selectedLanguage,
+          general_comments_original: evaluationData.general_comments,
+          general_comments_language: selectedLanguage,
         }),
       })
 
@@ -252,16 +310,34 @@ export function EvaluationForm({ instructor, onClose }: EvaluationFormProps) {
                   </div>
                 ))}
                 <div className="space-y-2">
-                  <Label htmlFor="teaching-comments" className="text-sm font-medium">
-                    Additional Comments (Optional)
-                  </Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="teaching-comments" className="text-sm font-medium">
+                      Additional Comments (Optional)
+                    </Label>
+                    <Select value={selectedLanguage} onValueChange={(value) => setSelectedLanguage(value as SupportedLanguage)}>
+                      <SelectTrigger className="w-[180px]">
+                        <Languages className="w-4 h-4 mr-2" />
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {languages.map(lang => (
+                          <SelectItem key={lang.code} value={lang.code}>
+                            {lang.nativeName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <Textarea
                     id="teaching-comments"
-                    placeholder="Share your thoughts about the instructor's teaching effectiveness..."
+                    placeholder={placeholders.teaching_comments[selectedLanguage]}
                     value={evaluationData.teaching_comments}
                     onChange={(e) => handleCommentChange("teaching_comments", e.target.value)}
                     rows={4}
                   />
+                  <p className="text-xs text-muted-foreground">
+                    {uiText.translationNote[selectedLanguage]}
+                  </p>
                 </div>
               </div>
             )}
@@ -275,16 +351,34 @@ export function EvaluationForm({ instructor, onClose }: EvaluationFormProps) {
                   </div>
                 ))}
                 <div className="space-y-2">
-                  <Label htmlFor="materials-comments" className="text-sm font-medium">
-                    Additional Comments (Optional)
-                  </Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="materials-comments" className="text-sm font-medium">
+                      Additional Comments (Optional)
+                    </Label>
+                    <Select value={selectedLanguage} onValueChange={(value) => setSelectedLanguage(value as SupportedLanguage)}>
+                      <SelectTrigger className="w-[180px]">
+                        <Languages className="w-4 h-4 mr-2" />
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {languages.map(lang => (
+                          <SelectItem key={lang.code} value={lang.code}>
+                            {lang.nativeName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <Textarea
                     id="materials-comments"
-                    placeholder="Share your thoughts about the learning materials provided..."
+                    placeholder={placeholders.materials_comments[selectedLanguage]}
                     value={evaluationData.materials_comments}
                     onChange={(e) => handleCommentChange("materials_comments", e.target.value)}
                     rows={4}
                   />
+                  <p className="text-xs text-muted-foreground">
+                    {uiText.translationNote[selectedLanguage]}
+                  </p>
                 </div>
               </div>
             )}
@@ -298,28 +392,64 @@ export function EvaluationForm({ instructor, onClose }: EvaluationFormProps) {
                   </div>
                 ))}
                 <div className="space-y-2">
-                  <Label htmlFor="communication-comments" className="text-sm font-medium">
-                    Additional Comments (Optional)
-                  </Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="communication-comments" className="text-sm font-medium">
+                      Additional Comments (Optional)
+                    </Label>
+                    <Select value={selectedLanguage} onValueChange={(value) => setSelectedLanguage(value as SupportedLanguage)}>
+                      <SelectTrigger className="w-[180px]">
+                        <Languages className="w-4 h-4 mr-2" />
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {languages.map(lang => (
+                          <SelectItem key={lang.code} value={lang.code}>
+                            {lang.nativeName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <Textarea
                     id="communication-comments"
-                    placeholder="Share your thoughts about the instructor's communication and accessibility..."
+                    placeholder={placeholders.communication_comments[selectedLanguage]}
                     value={evaluationData.communication_comments}
                     onChange={(e) => handleCommentChange("communication_comments", e.target.value)}
                     rows={4}
                   />
+                  <p className="text-xs text-muted-foreground">
+                    {uiText.translationNote[selectedLanguage]}
+                  </p>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="general-comments" className="text-sm font-medium">
-                    General Comments (Optional)
-                  </Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="general-comments" className="text-sm font-medium">
+                      General Comments (Optional)
+                    </Label>
+                    <Select value={selectedLanguage} onValueChange={(value) => setSelectedLanguage(value as SupportedLanguage)}>
+                      <SelectTrigger className="w-[180px]">
+                        <Languages className="w-4 h-4 mr-2" />
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {languages.map(lang => (
+                          <SelectItem key={lang.code} value={lang.code}>
+                            {lang.nativeName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <Textarea
                     id="general-comments"
-                    placeholder="Any additional feedback about this instructor..."
+                    placeholder={placeholders.general_comments[selectedLanguage]}
                     value={evaluationData.general_comments}
                     onChange={(e) => handleCommentChange("general_comments", e.target.value)}
                     rows={4}
                   />
+                  <p className="text-xs text-muted-foreground">
+                    {uiText.translationNote[selectedLanguage]}
+                  </p>
                 </div>
               </div>
             )}
