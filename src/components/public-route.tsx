@@ -4,7 +4,6 @@ import { useAuth } from "../context/AuthContext";
 
 export function PublicRoute({ children }: { children: React.ReactNode }) {
   const { user, initializing } = useAuth();
-  const [showLandingFirst, setShowLandingFirst] = useState(false);
   const [readyToRedirect, setReadyToRedirect] = useState(false);
 
   useEffect(() => {
@@ -16,8 +15,6 @@ export function PublicRoute({ children }: { children: React.ReactNode }) {
 
     // When user logs in, show landing page briefly before redirecting
     if (user && !initializing) {
-      setShowLandingFirst(true);
-      
       // Wait 1 second to show landing page, then redirect
       const timer = setTimeout(() => {
         setReadyToRedirect(true);
