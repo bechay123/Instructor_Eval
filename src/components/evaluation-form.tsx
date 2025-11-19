@@ -107,16 +107,24 @@ export function EvaluationForm({ instructor, onClose }: EvaluationFormProps) {
     setEvaluationData((prev) => ({ ...prev, [key]: value }))
   }
 
+  const sanitizeInput = (value: string): string => {
+    // Only allow: uppercase letters, lowercase letters, numbers 0-9, spaces, and specific punctuation: .,!?;:'"()-
+    return value.replace(/[^A-Za-z0-9\s.,!?;:'"\-()]/g, '');
+  };
+
   const handleCommentChange = (field: keyof EvaluationData, value: string) => {
+    // Sanitize input first
+    const sanitizedValue = sanitizeInput(value);
+    
     // Check for profanity before updating
-    const profanityCheck = checkProfanity(value, selectedLanguage);
+    const profanityCheck = checkProfanity(sanitizedValue, selectedLanguage);
     
     if (profanityCheck.isProfane) {
       alert(getProfanityErrorMessage(selectedLanguage));
       return; // Don't update the field
     }
     
-    setEvaluationData((prev) => ({ ...prev, [field]: value }))
+    setEvaluationData((prev) => ({ ...prev, [field]: sanitizedValue }))
   }
 
   const handleSubmit = async () => {
