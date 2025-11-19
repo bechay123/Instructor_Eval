@@ -15,7 +15,7 @@ interface LoginModalProps {
 
 export function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const navigate = useNavigate();
-  const { login, logout } = useAuth();
+  const { login, logout, user } = useAuth();
   const [loginEmail, setLoginEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<"student" | "instructor">("student");
@@ -84,12 +84,35 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
       setLoginEmail("");
       setPassword("");
       
-      // Navigate to landing page first, then let ProtectedRoute redirect to proper dashboard
-      // This prevents the flash of landing page after successful login
-      setTimeout(() => {
-        navigate("/");
-        setIsLoading(false);
-      }, 300);
+      // Navigate directly to the appropriate dashboard based on user role
+      const dashboardPath =
+        userRole === "admin"
+          ? "/admin-dashboard"
+          : userRole === "instructor"
+          ? "/instructor-dashboard"
+          : "/student-dashboard";
+
+      console.log("Navigating to dashboard:", dashboardPath);
+      
+      // Wait for auth context to update with user profile
+      let attempts = 0;
+      const maxAttempts = 20; // 2 seconds max wait
+      const checkUserLoaded = setInterval(() => {
+        attempts++;
+        console.log(`Checking if user loaded (attempt ${attempts}):`, user);
+        
+        if (user && user.role === userRole) {
+          clearInterval(checkUserLoaded);
+          console.log("User loaded, navigating now");
+          navigate(dashboardPath, { replace: true });
+          setIsLoading(false);
+        } else if (attempts >= maxAttempts) {
+          clearInterval(checkUserLoaded);
+          console.log("Max attempts reached, navigating anyway");
+          navigate(dashboardPath, { replace: true });
+          setIsLoading(false);
+        }
+      }, 100);
     } catch (err: any) {
       console.error("Unexpected error during login:", err);
       setError(err.message || "An unexpected error occurred during login");

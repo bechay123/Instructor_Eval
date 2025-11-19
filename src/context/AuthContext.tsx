@@ -230,9 +230,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
-      // Only handle SIGNED_OUT and TOKEN_REFRESHED, ignore SIGNED_IN (already handled in INITIAL_SESSION)
+      // Handle SIGNED_IN event (user just logged in)
       if (event === "SIGNED_IN") {
-        console.log("🟡 onAuthStateChange: Ignoring duplicate SIGNED_IN event");
+        console.log("🟢 onAuthStateChange: Handling SIGNED_IN event");
+        if (session?.user) {
+          console.log("🟢 onAuthStateChange: Loading profile for signed in user");
+          showLoading("Loading profile...", "Please wait");
+          await fetchUserProfile(session.user);
+          hideLoading();
+        }
         return;
       }
 
@@ -244,7 +250,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Handle other auth events (SIGNED_OUT, etc.)
       if (session?.user) {
         console.log(
-          "� onAuthStateChange: Session user found, user ID:",
+          "🟢 onAuthStateChange: Session user found, user ID:",
           session.user.id
         );
         showLoading("Loading profile...", "Please wait");

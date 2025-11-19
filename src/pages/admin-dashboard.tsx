@@ -190,7 +190,6 @@ export default function AdminDashboard() {
       setLoading(true);
       await Promise.all([
         loadUsers(),
-        loadPendingUsers(),
         loadStats(),
         loadCourses(),
         loadInstructors(),
@@ -207,7 +206,6 @@ export default function AdminDashboard() {
     const { data, error } = await supabase
       .from("profiles")
       .select("*")
-      .neq("status", "pending")
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -215,22 +213,17 @@ export default function AdminDashboard() {
       return;
     }
 
-    setUsers(data || []);
-  };
+    console.log("All users loaded:", data?.length, data);
 
-  const loadPendingUsers = async () => {
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("status", "pending")
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("Error loading pending users:", error);
-      return;
-    }
-
-    setPendingUsers(data || []);
+    // Separate pending and non-pending users
+    const pending = data?.filter(u => u.status === "pending") || [];
+    const nonPending = data?.filter(u => u.status !== "pending") || [];
+    
+    console.log("Pending users:", pending.length);
+    console.log("Non-pending users:", nonPending.length);
+    
+    setUsers(nonPending);
+    setPendingUsers(pending);
   };
 
   const loadStats = async () => {
@@ -386,6 +379,7 @@ export default function AdminDashboard() {
 
       if (error) throw error;
 
+      console.log("Instructors loaded:", data?.length, data);
       setInstructors(data || []);
     } catch (error) {
       console.error("Error loading instructors:", error);
@@ -855,27 +849,27 @@ export default function AdminDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {users.slice(0, 5).map((user) => (
+                <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                  {users.map((user) => (
                     <div
                       key={user.id}
-                      className="flex items-center justify-between p-3 bg-[#F9F5F0] rounded-lg"
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 bg-[#F9F5F0] rounded-lg"
                     >
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <Avatar className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0">
                           <AvatarFallback className="bg-[#344F1F] text-[#F2EAD3] text-sm">
                             {user.first_name[0]}
                             {user.last_name[0]}
                           </AvatarFallback>
                         </Avatar>
-                        <div>
-                          <p className="font-medium text-[#344F1F]">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-[#344F1F] truncate">
                             {user.first_name} {user.last_name}
                           </p>
-                          <p className="text-sm text-gray-600">{user.email}</p>
+                          <p className="text-xs sm:text-sm text-gray-600 truncate">{user.email}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap sm:flex-shrink-0">
                         {getRoleBadge(user.role)}
                         {getStatusBadge(user.status)}
                       </div>

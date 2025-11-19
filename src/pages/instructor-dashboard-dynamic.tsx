@@ -912,39 +912,27 @@ export default function InstructorDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F9F5F0] to-[#F2EAD3]/30">
       {/* Sticky Header */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-[#344F1F]/10 shadow-sm">
+      <header className="bg-gradient-to-r from-[#F2EAD3] via-[#F9F5F0] to-[#F2EAD3] border-b-2 border-[#344F1F]/20 sticky top-0 z-50 shadow-sm">
         <div className="w-full px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             {/* Left: Instructor Profile */}
-            <div className="flex items-center gap-3">
-              <Avatar className="h-12 w-12 ring-2 ring-[#344F1F] ring-offset-2">
+            <div className="flex items-center gap-4">
+              <Avatar className="h-12 w-12 sm:h-14 sm:w-14 ring-2 ring-[#F4991A] ring-offset-2 ring-offset-[#F9F5F0]">
                 <AvatarImage src="/placeholder.svg" />
-                <AvatarFallback className="bg-gradient-to-br from-[#344F1F] to-[#344F1F]/80 text-[#F2EAD3] font-bold">
+                <AvatarFallback className="bg-gradient-to-br from-[#344F1F] to-[#344F1F]/80 text-[#F2EAD3] font-bold text-base">
                   {getInitials(user?.firstName, user?.lastName)}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <h1 className="text-lg font-bold text-[#344F1F]">
+                <h1 className="text-lg sm:text-xl font-bold text-black">
                   Welcome, {user?.firstName} {user?.lastName}
                 </h1>
-                <p className="text-sm text-black/60">Instructor Dashboard</p>
+                <p className="text-sm text-black/70 font-medium">Instructor Dashboard</p>
               </div>
             </div>
 
-            {/* Right: Course Selection, Profile & Logout */}
+            {/* Right: Profile & Logout */}
             <div className="flex items-center gap-3">
-              <select
-                value={selectedCourse}
-                onChange={(e) => setSelectedCourse(e.target.value)}
-                className="hidden sm:block px-4 py-2 border border-[#344F1F]/20 rounded-lg text-sm bg-white hover:border-[#344F1F]/40 transition-colors focus:outline-none focus:ring-2 focus:ring-[#F4991A]"
-              >
-                {courses.map((course) => (
-                  <option key={course.id} value={course.id}>
-                    {course.code} - {course.name}
-                  </option>
-                ))}
-              </select>
-
               {/* Profile Modal */}
               <Dialog
                 open={showProfileModal}
@@ -959,7 +947,7 @@ export default function InstructorDashboard() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="border-[#344F1F]/20 hover:bg-[#344F1F] hover:text-[#F2EAD3] transition-all"
+                    className="bg-white border-[#344F1F]/20 hover:bg-[#344F1F] hover:text-[#F2EAD3] transition-colors"
                   >
                     <UserCircle className="h-4 w-4 mr-2" />
                     Profile
@@ -1287,25 +1275,39 @@ export default function InstructorDashboard() {
               <Button
                 onClick={handleLogout}
                 variant="outline"
-                size="sm"
-                className="border-[#344F1F]/20 hover:bg-[#344F1F] hover:text-[#F2EAD3] transition-all"
+                className="bg-white border-[#344F1F]/20 hover:bg-[#344F1F] hover:text-[#F2EAD3] transition-colors"
               >
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
               </Button>
             </div>
           </div>
+          
+          {/* Course Selector - Full Width Below Header */}
+          <div className="mt-4 pt-4 border-t border-[#344F1F]/10">
+            <select
+              value={selectedCourse}
+              onChange={(e) => setSelectedCourse(e.target.value)}
+              className="w-full px-4 py-2.5 border border-[#344F1F]/20 rounded-lg text-sm bg-white hover:border-[#344F1F]/40 transition-colors focus:outline-none focus:ring-2 focus:ring-[#F4991A] font-medium"
+            >
+              {courses.map((course) => (
+                <option key={course.id} value={course.id}>
+                  {course.code} - {course.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </header>
 
       <main className="w-full px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h2 className="text-3xl font-bold text-[#344F1F] mb-2">
+        <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="min-w-0">
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#344F1F] mb-2">
               Course Evaluation Dashboard
             </h2>
-            <p className="text-black/60">
+            <p className="text-sm sm:text-base text-black/60">
               Track your teaching performance and student feedback
             </p>
           </div>
@@ -1323,7 +1325,7 @@ export default function InstructorDashboard() {
           >
             <DialogTrigger asChild>
               <Button
-                className="bg-[#F4991A] hover:bg-[#e08915] text-white shadow-md hover:shadow-lg transition-all"
+                className="bg-[#F4991A] hover:bg-[#e08915] text-white shadow-md hover:shadow-lg transition-all w-full sm:w-auto flex-shrink-0"
                 disabled={!selectedCourse}
               >
                 <UserPlus className="h-4 w-4 mr-2" />
@@ -1521,45 +1523,45 @@ export default function InstructorDashboard() {
               activeTab
             )}
             {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
               {/* Total Evaluations Card */}
               <Card className="border-none shadow-lg hover:shadow-xl transition-shadow bg-white">
-                <CardContent className="p-6">
+                <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-black/60 mb-1">
+                      <p className="text-xs sm:text-sm font-medium text-black/60 mb-1">
                         Total Evaluations
                       </p>
-                      <p className="text-3xl font-bold text-[#344F1F]">
+                      <p className="text-2xl sm:text-3xl font-bold text-[#344F1F]">
                         {evaluationData?.totalEvaluations || 0}
                       </p>
                     </div>
-                    <div className="p-3 bg-[#344F1F]/10 rounded-full">
-                      <Users className="h-6 w-6 text-[#344F1F]" />
+                    <div className="p-2 sm:p-3 bg-[#344F1F]/10 rounded-full flex-shrink-0">
+                      <Users className="h-5 w-5 sm:h-6 sm:w-6 text-[#344F1F]" />
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
               {/* Overall Rating Card */}
-              <Card className="border-none shadow-lg hover:shadow-xl transition-shadow bg-gradient-to-br from-[#F4991A]/5 to-white">
-                <CardContent className="p-6">
+              <Card className="border-none shadow-lg hover:shadow-xl transition-shadow bg-gradient-to-br from-[#F4991A]/5 to-white sm:col-span-2 lg:col-span-1">
+                <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-black/60 mb-1">
+                      <p className="text-xs sm:text-sm font-medium text-black/60 mb-1">
                         Overall Rating
                       </p>
-                      <div className="flex items-baseline gap-3">
-                        <p className="text-4xl font-extrabold text-[#F4991A]">
+                      <div className="flex items-baseline gap-2 sm:gap-3">
+                        <p className="text-3xl sm:text-4xl font-extrabold text-[#F4991A]">
                           {evaluationData?.overallRating.toFixed(1) || "0.0"}
                         </p>
-                        <p className="text-sm font-semibold text-black">/5.0</p>
+                        <p className="text-xs sm:text-sm font-semibold text-black">/5.0</p>
                       </div>
-                      <div className="flex gap-1 mt-3 items-center">
+                      <div className="flex gap-1 mt-2 sm:mt-3 items-center">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <Star
                             key={star}
-                            className={`h-5 w-5 ${
+                            className={`h-4 w-4 sm:h-5 sm:w-5 ${
                               star <=
                               Math.round(evaluationData?.overallRating || 0)
                                 ? "fill-[#F4991A] text-[#F4991A]"
@@ -1569,33 +1571,33 @@ export default function InstructorDashboard() {
                         ))}
                       </div>
                     </div>
-                    <div className="p-3 bg-[#F4991A]/10 rounded-full">
-                      <Star className="h-6 w-6 text-[#F4991A]" />
+                    <div className="p-2 sm:p-3 bg-[#F4991A]/10 rounded-full flex-shrink-0">
+                      <Star className="h-5 w-5 sm:h-6 sm:w-6 text-[#F4991A]" />
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
               {/* Response Rate Card */}
-              <Card className="border-none shadow-lg hover:shadow-xl transition-shadow bg-white">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="w-full">
-                      <p className="text-sm font-medium text-black/60 mb-1">
+              <Card className="border-none shadow-lg hover:shadow-xl transition-shadow bg-white sm:col-span-2 lg:col-span-1">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="w-full min-w-0">
+                      <p className="text-xs sm:text-sm font-medium text-black/60 mb-1">
                         Response Rate
                       </p>
-                      <p className="text-3xl font-extrabold text-[#344F1F]">
+                      <p className="text-2xl sm:text-3xl font-extrabold text-[#344F1F]">
                         {evaluationData?.responseRate.toFixed(0) || 0}%
                       </p>
-                      <div className="mt-3">
+                      <div className="mt-2 sm:mt-3">
                         <Progress
                           value={evaluationData?.responseRate || 0}
-                          className="h-3 rounded-full"
+                          className="h-2 sm:h-3 rounded-full"
                         />
                       </div>
                     </div>
-                    <div className="p-3 bg-[#344F1F]/10 rounded-full">
-                      <TrendingUp className="h-6 w-6 text-[#344F1F]" />
+                    <div className="p-2 sm:p-3 bg-[#344F1F]/10 rounded-full flex-shrink-0">
+                      <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-[#344F1F]" />
                     </div>
                   </div>
                 </CardContent>
@@ -1611,33 +1613,33 @@ export default function InstructorDashboard() {
               }}
               className="space-y-6"
             >
-              <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 gap-2 bg-white p-2 rounded-xl shadow-md border border-[#344F1F]/10">
+              <TabsList className="bg-white shadow-md border-[#344F1F]/20 flex justify-center flex-wrap h-auto gap-3 p-3 rounded-lg">
                 <TabsTrigger
                   value="overview"
-                  className="data-[state=active]:bg-[#344F1F] data-[state=active]:text-[#F2EAD3] flex items-center gap-2 rounded-lg transition-all"
+                  className="text-sm sm:text-base data-[state=active]:bg-[#344F1F] data-[state=active]:text-[#F2EAD3] data-[state=active]:shadow-lg transition-all px-6 py-3"
                 >
-                  <BarChart3 className="h-4 w-4" />
+                  <BarChart3 className="h-5 w-5 sm:mr-2" />
                   <span className="hidden sm:inline">Overview</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="detailed"
-                  className="data-[state=active]:bg-[#344F1F] data-[state=active]:text-[#F2EAD3] flex items-center gap-2 rounded-lg transition-all"
+                  className="text-sm sm:text-base data-[state=active]:bg-[#344F1F] data-[state=active]:text-[#F2EAD3] data-[state=active]:shadow-lg transition-all px-6 py-3"
                 >
-                  <Award className="h-4 w-4" />
+                  <Award className="h-5 w-5 sm:mr-2" />
                   <span className="hidden sm:inline">Detailed Ratings</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="comments"
-                  className="data-[state=active]:bg-[#344F1F] data-[state=active]:text-[#F2EAD3] flex items-center gap-2 rounded-lg transition-all"
+                  className="text-sm sm:text-base data-[state=active]:bg-[#344F1F] data-[state=active]:text-[#F2EAD3] data-[state=active]:shadow-lg transition-all px-6 py-3"
                 >
-                  <MessageSquare className="h-4 w-4" />
-                  <span className="hidden sm:inline">Student Comments</span>
+                  <MessageSquare className="h-5 w-5 sm:mr-2" />
+                  <span className="hidden sm:inline">Student Feedback</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="ai"
-                  className="data-[state=active]:bg-[#344F1F] data-[state=active]:text-[#F2EAD3] flex items-center gap-2 rounded-lg transition-all"
+                  className="text-sm sm:text-base data-[state=active]:bg-[#344F1F] data-[state=active]:text-[#F2EAD3] data-[state=active]:shadow-lg transition-all px-6 py-3"
                 >
-                  <Brain className="h-4 w-4" />
+                  <Brain className="h-5 w-5 sm:mr-2" />
                   <span className="hidden sm:inline">AI Analysis</span>
                 </TabsTrigger>
               </TabsList>
@@ -2096,9 +2098,9 @@ export default function InstructorDashboard() {
                         </div>
 
                         {/* Sentiment Analysis */}
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                          <div className="bg-white p-4 rounded-lg border-2 border-gray-200 hover:border-[#F4991A]/30 transition-all">
-                            <p className="text-sm text-black/60 mb-2">
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                          <div className="bg-white p-3 sm:p-4 rounded-lg border-2 border-gray-200 hover:border-[#F4991A]/30 transition-all">
+                            <p className="text-xs sm:text-sm text-black/60 mb-2">
                               Overall Sentiment
                             </p>
                             <div className="flex items-center gap-2">
@@ -2132,8 +2134,8 @@ export default function InstructorDashboard() {
                             </div>
                           </div>
 
-                          <div className="bg-white p-4 rounded-lg border-2 border-gray-200">
-                            <p className="text-sm text-black/60 mb-2">
+                          <div className="bg-white p-3 sm:p-4 rounded-lg border-2 border-gray-200">
+                            <p className="text-xs sm:text-sm text-black/60 mb-2">
                               Teaching
                             </p>
                             <div className="flex items-center gap-2">
@@ -2167,8 +2169,8 @@ export default function InstructorDashboard() {
                             </div>
                           </div>
 
-                          <div className="bg-white p-4 rounded-lg border-2 border-gray-200">
-                            <p className="text-sm text-black/60 mb-2">
+                          <div className="bg-white p-3 sm:p-4 rounded-lg border-2 border-gray-200">
+                            <p className="text-xs sm:text-sm text-black/60 mb-2">
                               Materials
                             </p>
                             <div className="flex items-center gap-2">
@@ -2202,8 +2204,8 @@ export default function InstructorDashboard() {
                             </div>
                           </div>
 
-                          <div className="bg-white p-4 rounded-lg border-2 border-gray-200">
-                            <p className="text-sm text-black/60 mb-2">
+                          <div className="bg-white p-3 sm:p-4 rounded-lg border-2 border-gray-200">
+                            <p className="text-xs sm:text-sm text-black/60 mb-2">
                               Communication
                             </p>
                             <div className="flex items-center gap-2">
@@ -2239,10 +2241,10 @@ export default function InstructorDashboard() {
                         </div>
 
                         {/* Strengths */}
-                        <div className="bg-green-50 p-6 rounded-lg border-2 border-green-200">
-                          <div className="flex items-center gap-2 mb-4">
-                            <ThumbsUp className="h-5 w-5 text-green-600" />
-                            <h3 className="font-bold text-green-800 text-lg">
+                        <div className="bg-green-50 p-4 sm:p-6 rounded-lg border-2 border-green-200">
+                          <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                            <ThumbsUp className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
+                            <h3 className="font-bold text-green-800 text-base sm:text-lg">
                               Key Strengths
                             </h3>
                           </div>
@@ -2262,10 +2264,10 @@ export default function InstructorDashboard() {
                         </div>
 
                         {/* Areas for Improvement */}
-                        <div className="bg-orange-50 p-6 rounded-lg border-2 border-orange-200">
-                          <div className="flex items-center gap-2 mb-4">
-                            <AlertCircle className="h-5 w-5 text-orange-600" />
-                            <h3 className="font-bold text-orange-800 text-lg">
+                        <div className="bg-orange-50 p-4 sm:p-6 rounded-lg border-2 border-orange-200">
+                          <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                            <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600" />
+                            <h3 className="font-bold text-orange-800 text-base sm:text-lg">
                               Areas for Improvement
                             </h3>
                           </div>
@@ -2289,10 +2291,10 @@ export default function InstructorDashboard() {
                         </div>
 
                         {/* Recommendations */}
-                        <div className="bg-blue-50 p-6 rounded-lg border-2 border-blue-200">
-                          <div className="flex items-center gap-2 mb-4">
-                            <Lightbulb className="h-5 w-5 text-blue-600" />
-                            <h3 className="font-bold text-blue-800 text-lg">
+                        <div className="bg-blue-50 p-4 sm:p-6 rounded-lg border-2 border-blue-200">
+                          <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                            <Lightbulb className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+                            <h3 className="font-bold text-blue-800 text-base sm:text-lg">
                               Actionable Recommendations
                             </h3>
                           </div>
@@ -2314,10 +2316,10 @@ export default function InstructorDashboard() {
                         </div>
 
                         {/* Key Themes */}
-                        <div className="bg-purple-50 p-6 rounded-lg border-2 border-purple-200">
-                          <div className="flex items-center gap-2 mb-4">
-                            <Brain className="h-5 w-5 text-purple-600" />
-                            <h3 className="font-bold text-purple-800 text-lg">
+                        <div className="bg-purple-50 p-4 sm:p-6 rounded-lg border-2 border-purple-200">
+                          <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                            <Brain className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />
+                            <h3 className="font-bold text-purple-800 text-base sm:text-lg">
                               Key Themes Identified
                             </h3>
                           </div>
@@ -2325,7 +2327,7 @@ export default function InstructorDashboard() {
                             {aiAnalysis.keyThemes.map((theme, index) => (
                               <span
                                 key={index}
-                                className="px-4 py-2 bg-purple-100 border border-purple-300 rounded-full text-purple-900 text-sm font-medium"
+                                className="px-3 sm:px-4 py-1.5 sm:py-2 bg-purple-100 border border-purple-300 rounded-full text-purple-900 text-xs sm:text-sm font-medium"
                               >
                                 {theme}
                               </span>

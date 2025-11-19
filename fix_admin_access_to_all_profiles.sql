@@ -1,8 +1,7 @@
--- Fix RLS policies for profiles table to allow admins to view ALL profiles
--- This is critical for the admin dashboard to display all users
--- Run this in Supabase SQL Editor
+-- Fix RLS policies to allow admins to view all profiles
+-- This fixes the issue where admins cannot see all users in the admin dashboard
 
--- Check current RLS policies
+-- First, let's check what policies exist
 SELECT 
     schemaname,
     tablename,
@@ -15,7 +14,7 @@ SELECT
 FROM pg_policies
 WHERE tablename = 'profiles';
 
--- Drop ALL existing policies to start fresh
+-- Drop existing restrictive policies and create comprehensive ones
 DROP POLICY IF EXISTS "Users can view their own profile" ON profiles;
 DROP POLICY IF EXISTS "Users can read own profile" ON profiles;
 DROP POLICY IF EXISTS "Allow users to read own profile" ON profiles;
@@ -23,7 +22,6 @@ DROP POLICY IF EXISTS "Users can update their own profile" ON profiles;
 DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
 DROP POLICY IF EXISTS "Admins can view all profiles" ON profiles;
 DROP POLICY IF EXISTS "Admins can update all profiles" ON profiles;
-DROP POLICY IF EXISTS "Admins can delete profiles" ON profiles;
 DROP POLICY IF EXISTS "Service role has full access" ON profiles;
 
 -- Policy 1: Users can read their own profile
@@ -33,7 +31,7 @@ FOR SELECT
 TO authenticated
 USING (auth.uid() = id);
 
--- Policy 2: ADMINS CAN VIEW ALL PROFILES (this is the key fix!)
+-- Policy 2: Admins can view ALL profiles
 CREATE POLICY "Admins can view all profiles"
 ON profiles
 FOR SELECT
@@ -54,7 +52,7 @@ TO authenticated
 USING (auth.uid() = id)
 WITH CHECK (auth.uid() = id);
 
--- Policy 4: ADMINS CAN UPDATE ALL PROFILES
+-- Policy 4: Admins can update any profile
 CREATE POLICY "Admins can update all profiles"
 ON profiles
 FOR UPDATE
@@ -74,7 +72,8 @@ WITH CHECK (
   )
 );
 
--- Policy 5: ADMINS CAN DELETE ANY PROFILE
+-- Policy 5: Admins can delete profiles
+DROP POLICY IF EXISTS "Admins can delete profiles" ON profiles;
 CREATE POLICY "Admins can delete profiles"
 ON profiles
 FOR DELETE
@@ -105,5 +104,5 @@ FROM pg_policies
 WHERE tablename = 'profiles'
 ORDER BY policyname;
 
--- Test: This should now return ALL profiles when run by an admin
+-- Test query (should return all profiles if you're an admin)
 -- SELECT * FROM profiles ORDER BY created_at DESC;
