@@ -59,10 +59,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
-      // Check if authUser.id is undefined on first attempt
+      // Check if authUser.id is undefined
       if (!authUser?.id) {
-        console.error("🔴 fetchUserProfile: authUser.id is undefined, reloading page...");
-        window.location.reload();
+        console.error("🔴 fetchUserProfile: authUser.id is undefined, skipping");
         return;
       }
 
@@ -242,24 +241,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
+      // Handle TOKEN_REFRESHED (happens on alt-tab, visibility change, etc.)
       if (event === "TOKEN_REFRESHED") {
-        console.log("🟡 onAuthStateChange: Token refreshed, no action needed");
+        console.log("🟡 onAuthStateChange: Token refreshed - no reload needed");
+        // User is already loaded, just keep current state
         return;
       }
 
-      // Handle other auth events (SIGNED_OUT, etc.)
-      if (session?.user) {
-        console.log(
-          "🟢 onAuthStateChange: Session user found, user ID:",
-          session.user.id
-        );
-        showLoading("Loading profile...", "Please wait");
-        await fetchUserProfile(session.user);
-        hideLoading();
-      } else {
-        console.log("🔴 onAuthStateChange: No session, clearing user");
-        setUser(null);
+      // Handle USER_UPDATED
+      if (event === "USER_UPDATED") {
+        console.log("🟡 onAuthStateChange: User updated - keeping current state");
+        return;
       }
+
+      // Handle SIGNED_OUT
+      if (event === "SIGNED_OUT") {
+        console.log("🔴 onAuthStateChange: User signed out");
+        setUser(null);
+        return;
+      }
+
+      // For any other unexpected events, log and ignore
+      console.log("🟡 onAuthStateChange: Ignoring event:", event);
 
       console.log("🟣 onAuthStateChange: Auth state change handled");
     });
