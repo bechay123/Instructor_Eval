@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     let mounted = true;
     console.log("🔵 AuthContext: mounted flag set to true");
 
-    const fetchUserProfile = async (authUser: any) => {
+    const fetchUserProfile = async (authUser: any, showLoadingIndicator = true) => {
       console.log("🟡 fetchUserProfile: Starting, mounted =", mounted);
       if (!mounted) {
         console.log(
@@ -69,8 +69,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         "🟡 fetchUserProfile: Fetching profile for user:",
         authUser.id
       );
-      setLoadingMessage("Loading your profile...", "Please wait");
-      console.log("🟡 fetchUserProfile: Loading message set");
+      if (showLoadingIndicator) {
+        setLoadingMessage("Loading your profile...", "Please wait");
+        console.log("🟡 fetchUserProfile: Loading message set");
+      }
 
       try {
         console.log("🟡 fetchUserProfile: Making Supabase query...");
@@ -187,6 +189,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Listen for auth changes - handles both initial session and changes
     console.log("🔵 AuthContext: Setting up onAuthStateChange listener");
     let hasHandledInitialSession = false;
+    let hasLoadedProfile = false; // Track if we've already loaded the profile
     
     const {
       data: { subscription },
@@ -195,7 +198,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         "🟣 onAuthStateChange: Event received:",
         event,
         "| Has session:",
-        !!session
+        !!session,
+        "| Has loaded profile:",
+        hasLoadedProfile
       );
 
       if (!mounted) {
@@ -210,9 +215,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         console.log("🟣 onAuthStateChange: Handling INITIAL_SESSION");
         hasHandledInitialSession = true;
         if (session?.user) {
-          console.log("� onAuthStateChange: Initial session found, fetching profile");
+          console.log("🟣 onAuthStateChange: Initial session found, fetching profile");
           showLoading("Loading profile...", "Please wait");
-          await fetchUserProfile(session.user);
+          await fetchUserProfile(session.user, true);
+          hasLoadedProfile = true; // Mark profile as loaded
           hideLoading();
         } else {
           console.log("🟣 onAuthStateChange: No initial session");
@@ -229,13 +235,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
-      // Handle SIGNED_IN event (user just logged in)
+      // Handle SIGNED_IN event (only if we haven't loaded profile yet - actual login action)
       if (event === "SIGNED_IN") {
-        console.log("🟢 onAuthStateChange: Handling SIGNED_IN event");
+        if (hasLoadedProfile) {
+          console.log("🟡 onAuthStateChange: Ignoring duplicate SIGNED_IN - profile already loaded");
+          return;
+        }
+        console.log("🟢 onAuthStateChange: Handling SIGNED_IN event (actual login)");
         if (session?.user) {
           console.log("🟢 onAuthStateChange: Loading profile for signed in user");
           showLoading("Loading profile...", "Please wait");
-          await fetchUserProfile(session.user);
+          await fetchUserProfile(session.user, true);
+          hasLoadedProfile = true; // Mark profile as loaded
           hideLoading();
         }
         return;
@@ -258,6 +269,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (event === "SIGNED_OUT") {
         console.log("🔴 onAuthStateChange: User signed out");
         setUser(null);
+        hasLoadedProfile = false; // Reset for next login
         return;
       }
 
