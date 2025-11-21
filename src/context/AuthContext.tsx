@@ -50,8 +50,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     let mounted = true;
     console.log("🔵 AuthContext: mounted flag set to true");
 
-    const fetchUserProfile = async (authUser: any, showLoadingIndicator = true) => {
-      console.log("🟡 fetchUserProfile: Starting, mounted =", mounted);
+    const fetchUserProfile = async (authUser: any, showLoadingIndicator = true, retryCount = 0) => {
+      console.log("🟡 fetchUserProfile: Starting, mounted =", mounted, "retry =", retryCount);
       if (!mounted) {
         console.log(
           "🔴 fetchUserProfile: Component unmounted, skipping profile fetch"
@@ -84,24 +84,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         
         console.log("🟡 fetchUserProfile: Waiting for query response...");
         
-        // Add timeout to prevent infinite hanging
-        const queryPromise = supabase
+        const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("role, first_name, last_name, status, is_active")
           .eq("id", authUser.id)
           .single();
-        
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error("Profile fetch timeout after 10 seconds")), 10000)
-        );
-        
-        const { data: profile, error: profileError } = await Promise.race([
-          queryPromise,
-          timeoutPromise
-        ]).catch(err => {
-          console.error("🔴 fetchUserProfile: Query failed or timed out:", err);
-          return { data: null, error: err };
-        }) as any;
 
         console.log("🟡 fetchUserProfile: Query completed, mounted =", mounted);
         console.log("🟡 fetchUserProfile: RAW RESPONSE:", {
@@ -127,6 +114,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
 
         if (profileError) {
+          // If profile not found and we haven't retried too many times, retry with delay
+          if (profileError.code === 'PGRST116' && retryCount < 3) {
+            console.log(`🟡 fetchUserProfile: Profile not found, retrying in ${(retryCount + 1) * 1000}ms (attempt ${retryCount + 1}/3)`);
+            await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 1000));
+            return fetchUserProfile(authUser, showLoadingIndicator, retryCount + 1);
+          }
+          
           console.error(
             "🔴 fetchUserProfile: Profile fetch error:",
             profileError.message
@@ -378,51 +372,71 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const { data, error: authError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            role: role,
+            first_name: firstName,
+            last_name: lastName,
+          }
+        }
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        console.error("Signup error:", authError);
+        throw authError;
+      }
       if (!data.user) throw new Error("No user data returned from signup");
 
-      // Wait for the trigger to create the profile with default values
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // Update the profile with actual user data
+      // No trigger - create profile manually
       const { error: profileError } = await supabase
         .from("profiles")
-        .update({
+        .insert({
+          id: data.user.id,
+          email: email,
           role: role,
           first_name: firstName,
           last_name: lastName,
-          email: email,
-          is_active: false,
           status: "pending",
-        })
-        .eq("id", data.user.id);
+          is_active: false,
+        });
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error("Profile creation error:", profileError);
+        throw new Error(`Failed to create profile: ${profileError.message}`);
+      }
 
       // Create role-specific details
       if (role === "student") {
-        await supabase.from("student_details").insert([
-          {
+        const studentNumber = `${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`;
+        const { error: studentError } = await supabase
+          .from("student_details")
+          .insert({
             id: data.user.id,
-            student_number: `${new Date().getFullYear()}-${Math.floor(
-              10000 + Math.random() * 90000
-            )}`,
+            student_number: studentNumber,
             program: "Not Set",
             year_level: 1,
-          },
-        ]);
+          });
+
+        if (studentError) {
+          console.error("Student details error:", studentError);
+          throw new Error(`Failed to create student details: ${studentError.message}`);
+        }
       } else if (role === "instructor") {
-        await supabase.from("instructor_details").insert([
-          {
+        const { error: instructorError } = await supabase
+          .from("instructor_details")
+          .insert({
             id: data.user.id,
             department: "Not Set",
             academic_rank: "Instructor I",
-          },
-        ]);
+          });
+
+        if (instructorError) {
+          console.error("Instructor details error:", instructorError);
+          throw new Error(`Failed to create instructor details: ${instructorError.message}`);
+        }
       }
 
+      console.log("✅ Registration completed successfully for role:", role);
       return { error: null, role };
     } catch (error) {
       return { error: error as Error, role: null };

@@ -182,6 +182,10 @@ export default function AdminDashboard() {
     if (activeTab === "activity-logs") {
       loadActivityLogs();
       loadActivityLogStats();
+    } else if (activeTab === "pending") {
+      // Refresh users when pending tab is opened to ensure latest data
+      loadUsers();
+      loadStats();
     }
   }, [activeTab, activityFilterType]);
 
