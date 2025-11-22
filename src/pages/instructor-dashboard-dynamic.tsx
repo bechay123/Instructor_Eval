@@ -82,6 +82,7 @@ interface EvaluationData {
     communication: number;
   };
   comments: Array<{
+    evaluation_id?: string;
     teaching_comments: string;
     materials_comments: string;
     communication_comments: string;
@@ -288,10 +289,10 @@ export default function InstructorDashboard() {
 
       if (ratingsError) throw ratingsError;
 
-      // Fetch comments
+      // Fetch comments with evaluation_id for grouping by student
       const { data: comments, error: commentsError } = await supabase
         .from("evaluation_comments")
-        .select("*")
+        .select("*, evaluation_id")
         .in("evaluation_id", evaluationIds);
 
       if (commentsError) throw commentsError;
@@ -927,7 +928,9 @@ export default function InstructorDashboard() {
                 <h1 className="text-lg sm:text-xl font-bold text-black">
                   Welcome, {user?.firstName} {user?.lastName}
                 </h1>
-                <p className="text-sm text-black/70 font-medium">Instructor Dashboard</p>
+                <p className="text-sm text-black/70 font-medium">
+                  Instructor Dashboard
+                </p>
               </div>
             </div>
 
@@ -1282,7 +1285,7 @@ export default function InstructorDashboard() {
               </Button>
             </div>
           </div>
-          
+
           {/* Course Selector - Full Width Below Header */}
           <div className="mt-4 pt-4 border-t border-[#344F1F]/10">
             <select
@@ -1555,7 +1558,9 @@ export default function InstructorDashboard() {
                         <p className="text-3xl sm:text-4xl font-extrabold text-[#F4991A]">
                           {evaluationData?.overallRating.toFixed(1) || "0.0"}
                         </p>
-                        <p className="text-xs sm:text-sm font-semibold text-black">/5.0</p>
+                        <p className="text-xs sm:text-sm font-semibold text-black">
+                          /5.0
+                        </p>
                       </div>
                       <div className="flex gap-1 mt-2 sm:mt-3 items-center">
                         {[1, 2, 3, 4, 5].map((star) => (
@@ -1648,25 +1653,28 @@ export default function InstructorDashboard() {
               <TabsContent value="overview" className="space-y-6">
                 <Card className="border-none shadow-lg bg-white">
                   <CardHeader>
-                    <CardTitle className="text-[#344F1F]">
+                    <CardTitle className="text-[#344F1F] text-2xl">
                       Category Performance
                     </CardTitle>
                     <CardDescription>
                       Average ratings across evaluation categories
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-5">
+                  <CardContent className="space-y-4">
                     {/* Teaching Category */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-[#344F1F]">
-                          Teaching Effectiveness
-                        </span>
-                        <span className="text-sm font-bold text-[#F4991A]">
+                    <div className="p-4 bg-gradient-to-r from-[#344F1F]/8 to-transparent rounded-lg border-l-4 border-[#344F1F]">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <Award className="h-5 w-5 text-[#344F1F]" />
+                          <span className="font-semibold text-[#344F1F]">
+                            Teaching Effectiveness
+                          </span>
+                        </div>
+                        <span className="text-2xl font-extrabold text-[#F4991A]">
                           {evaluationData?.categoryAverages.teaching.toFixed(
                             1
                           ) || "0.0"}
-                          <span className="text-sm font-semibold text-black">
+                          <span className="text-sm font-semibold text-black/60 ml-1">
                             /5.0
                           </span>
                         </span>
@@ -1680,16 +1688,19 @@ export default function InstructorDashboard() {
                     </div>
 
                     {/* Materials Category */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-[#344F1F]">
-                          Learning Materials
-                        </span>
-                        <span className="text-sm font-bold text-[#F4991A]">
+                    <div className="p-4 bg-gradient-to-r from-[#F4991A]/8 to-transparent rounded-lg border-l-4 border-[#F4991A]">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <Sparkles className="h-5 w-5 text-[#F4991A]" />
+                          <span className="font-semibold text-[#344F1F]">
+                            Learning Materials
+                          </span>
+                        </div>
+                        <span className="text-2xl font-extrabold text-[#F4991A]">
                           {evaluationData?.categoryAverages.materials.toFixed(
                             1
                           ) || "0.0"}
-                          <span className="text-sm font-semibold text-black">
+                          <span className="text-sm font-semibold text-black/60 ml-1">
                             /5.0
                           </span>
                         </span>
@@ -1703,16 +1714,19 @@ export default function InstructorDashboard() {
                     </div>
 
                     {/* Communication Category */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-[#344F1F]">
-                          Communication & Accessibility
-                        </span>
-                        <span className="text-sm font-bold text-[#F4991A]">
+                    <div className="p-4 bg-gradient-to-r from-[#5a7f3a]/8 to-transparent rounded-lg border-l-4 border-[#5a7f3a]">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <MessageSquare className="h-5 w-5 text-[#5a7f3a]" />
+                          <span className="font-semibold text-[#344F1F]">
+                            Communication & Accessibility
+                          </span>
+                        </div>
+                        <span className="text-2xl font-extrabold text-[#F4991A]">
                           {evaluationData?.categoryAverages.communication.toFixed(
                             1
                           ) || "0.0"}
-                          <span className="text-sm font-semibold text-black">
+                          <span className="text-sm font-semibold text-black/60 ml-1">
                             /5.0
                           </span>
                         </span>
@@ -1733,19 +1747,22 @@ export default function InstructorDashboard() {
               <TabsContent value="detailed" className="space-y-6">
                 <Card className="border-none shadow-lg bg-white">
                   <CardHeader>
-                    <CardTitle className="text-[#344F1F]">
+                    <CardTitle className="text-[#344F1F] text-2xl">
                       Detailed Question Ratings
                     </CardTitle>
                     <CardDescription>
                       Individual question performance breakdown
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-6">
+                  <CardContent className="space-y-8">
                     {/* Teaching Questions */}
-                    <div>
-                      <h3 className="font-semibold text-[#344F1F] mb-3">
-                        Teaching Effectiveness
-                      </h3>
+                    <div className="p-5 bg-gradient-to-r from-[#344F1F]/8 to-transparent rounded-xl border-l-4 border-[#344F1F]">
+                      <div className="flex items-center gap-3 mb-4">
+                        <Award className="h-5 w-5 text-[#344F1F]" />
+                        <h3 className="text-lg font-bold text-[#344F1F]">
+                          Teaching Effectiveness
+                        </h3>
+                      </div>
                       <div className="space-y-3">
                         {[
                           {
@@ -1781,23 +1798,26 @@ export default function InstructorDashboard() {
                                 ) / ratings.length
                               : 0;
                           return (
-                            <div key={item.key} className="space-y-2">
+                            <div
+                              key={item.key}
+                              className="space-y-2 p-3 bg-white rounded-lg hover:bg-[#344F1F]/2 transition-colors"
+                            >
                               <div className="flex items-center justify-between">
-                                <span className="text-sm text-black/80">
+                                <span className="text-sm font-medium text-black/80">
                                   {item.label}
                                 </span>
                                 <span className="inline-flex items-center gap-2">
                                   <span className="text-lg font-extrabold text-[#F4991A]">
                                     {avg.toFixed(1)}
                                   </span>
-                                  <span className="text-sm font-semibold text-black">
+                                  <span className="text-xs font-semibold text-black/60">
                                     /5
                                   </span>
                                 </span>
                               </div>
                               <Progress
                                 value={avg * 20}
-                                className="h-3 rounded-full"
+                                className="h-2.5 rounded-full"
                               />
                             </div>
                           );
@@ -1806,10 +1826,13 @@ export default function InstructorDashboard() {
                     </div>
 
                     {/* Materials Questions */}
-                    <div>
-                      <h3 className="font-semibold text-[#344F1F] mb-3">
-                        Learning Materials
-                      </h3>
+                    <div className="p-5 bg-gradient-to-r from-[#F4991A]/8 to-transparent rounded-xl border-l-4 border-[#F4991A]">
+                      <div className="flex items-center gap-3 mb-4">
+                        <Sparkles className="h-5 w-5 text-[#F4991A]" />
+                        <h3 className="text-lg font-bold text-[#344F1F]">
+                          Learning Materials
+                        </h3>
+                      </div>
                       <div className="space-y-3">
                         {[
                           {
@@ -1842,23 +1865,26 @@ export default function InstructorDashboard() {
                                 ) / ratings.length
                               : 0;
                           return (
-                            <div key={item.key} className="space-y-2">
+                            <div
+                              key={item.key}
+                              className="space-y-2 p-3 bg-white rounded-lg hover:bg-[#F4991A]/2 transition-colors"
+                            >
                               <div className="flex items-center justify-between">
-                                <span className="text-sm text-black/80">
+                                <span className="text-sm font-medium text-black/80">
                                   {item.label}
                                 </span>
                                 <span className="inline-flex items-center gap-2">
                                   <span className="text-lg font-extrabold text-[#F4991A]">
                                     {avg.toFixed(1)}
                                   </span>
-                                  <span className="text-sm font-semibold text-black">
+                                  <span className="text-xs font-semibold text-black/60">
                                     /5
                                   </span>
                                 </span>
                               </div>
                               <Progress
                                 value={avg * 20}
-                                className="h-3 rounded-full"
+                                className="h-2.5 rounded-full"
                               />
                             </div>
                           );
@@ -1867,10 +1893,13 @@ export default function InstructorDashboard() {
                     </div>
 
                     {/* Communication Questions */}
-                    <div>
-                      <h3 className="font-semibold text-[#344F1F] mb-3">
-                        Communication & Accessibility
-                      </h3>
+                    <div className="p-5 bg-gradient-to-r from-[#5a7f3a]/8 to-transparent rounded-xl border-l-4 border-[#5a7f3a]">
+                      <div className="flex items-center gap-3 mb-4">
+                        <MessageSquare className="h-5 w-5 text-[#5a7f3a]" />
+                        <h3 className="text-lg font-bold text-[#344F1F]">
+                          Communication & Accessibility
+                        </h3>
+                      </div>
                       <div className="space-y-3">
                         {[
                           {
@@ -1906,23 +1935,26 @@ export default function InstructorDashboard() {
                                 ) / ratings.length
                               : 0;
                           return (
-                            <div key={item.key} className="space-y-2">
+                            <div
+                              key={item.key}
+                              className="space-y-2 p-3 bg-white rounded-lg hover:bg-[#5a7f3a]/2 transition-colors"
+                            >
                               <div className="flex items-center justify-between">
-                                <span className="text-sm text-black/80">
+                                <span className="text-sm font-medium text-black/80">
                                   {item.label}
                                 </span>
                                 <span className="inline-flex items-center gap-2">
                                   <span className="text-lg font-extrabold text-[#F4991A]">
                                     {avg.toFixed(1)}
                                   </span>
-                                  <span className="text-sm font-semibold text-black">
+                                  <span className="text-xs font-semibold text-black/60">
                                     /5
                                   </span>
                                 </span>
                               </div>
                               <Progress
                                 value={avg * 20}
-                                className="h-3 rounded-full"
+                                className="h-2.5 rounded-full"
                               />
                             </div>
                           );
@@ -1941,51 +1973,94 @@ export default function InstructorDashboard() {
                       Student Feedback
                     </CardTitle>
                     <CardDescription>
-                      Comments from student evaluations
+                      Anonymous comments grouped by student evaluations
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {evaluationData?.comments &&
                     evaluationData.comments.length > 0 ? (
-                      evaluationData.comments.map((comment, index) => (
-                        <div
-                          key={index}
-                          className="p-4 bg-white rounded-lg border-2 border-[#344F1F]/20 shadow-sm divide-y divide-[#344F1F]/10"
-                        >
-                          {comment.teaching_comments && (
-                            <BilingualComment
-                              title="Teaching"
-                              translatedText={comment.teaching_comments}
-                              originalText={comment.teaching_comments_original}
-                              languageCode={comment.teaching_comments_language}
-                            />
-                          )}
-                          {comment.materials_comments && (
-                            <BilingualComment
-                              title="Materials"
-                              translatedText={comment.materials_comments}
-                              originalText={comment.materials_comments_original}
-                              languageCode={comment.materials_comments_language}
-                            />
-                          )}
-                          {comment.communication_comments && (
-                            <BilingualComment
-                              title="Communication"
-                              translatedText={comment.communication_comments}
-                              originalText={comment.communication_comments_original}
-                              languageCode={comment.communication_comments_language}
-                            />
-                          )}
-                          {comment.general_comments && (
-                            <BilingualComment
-                              title="General"
-                              translatedText={comment.general_comments}
-                              originalText={comment.general_comments_original}
-                              languageCode={comment.general_comments_language}
-                            />
-                          )}
-                        </div>
-                      ))
+                      evaluationData.comments.map((comment, index) => {
+                        return (
+                          <div
+                            key={index}
+                            className="relative bg-gradient-to-br from-[#344F1F]/5 to-[#F4991A]/5 rounded-xl border-2 border-[#344F1F]/30 p-5 shadow-md hover:shadow-lg transition-shadow"
+                          >
+                            {/* Student Header Badge */}
+                            <div className="flex items-center gap-3 mb-4 pb-4 border-b-2 border-[#344F1F]/20">
+                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#344F1F] to-[#F4991A] text-white">
+                                <Users className="h-4 w-4" />
+                              </div>
+                              <div>
+                                <p className="text-sm font-semibold text-[#344F1F]">
+                                  Anonymous Student
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Comments Content */}
+                            <div className="space-y-3">
+                              {comment.teaching_comments && (
+                                <BilingualComment
+                                  title="Teaching"
+                                  translatedText={comment.teaching_comments}
+                                  originalText={
+                                    comment.teaching_comments_original
+                                  }
+                                  languageCode={
+                                    comment.teaching_comments_language
+                                  }
+                                />
+                              )}
+                              {comment.materials_comments && (
+                                <BilingualComment
+                                  title="Materials"
+                                  translatedText={comment.materials_comments}
+                                  originalText={
+                                    comment.materials_comments_original
+                                  }
+                                  languageCode={
+                                    comment.materials_comments_language
+                                  }
+                                />
+                              )}
+                              {comment.communication_comments && (
+                                <BilingualComment
+                                  title="Communication"
+                                  translatedText={
+                                    comment.communication_comments
+                                  }
+                                  originalText={
+                                    comment.communication_comments_original
+                                  }
+                                  languageCode={
+                                    comment.communication_comments_language
+                                  }
+                                />
+                              )}
+                              {comment.general_comments && (
+                                <BilingualComment
+                                  title="General"
+                                  translatedText={comment.general_comments}
+                                  originalText={
+                                    comment.general_comments_original
+                                  }
+                                  languageCode={
+                                    comment.general_comments_language
+                                  }
+                                />
+                              )}
+                              {!comment.teaching_comments &&
+                                !comment.materials_comments &&
+                                !comment.communication_comments &&
+                                !comment.general_comments && (
+                                  <p className="text-center text-black/60 py-4">
+                                    No comments provided by this evaluator.
+                                  </p>
+                                )}
+                            </div>
+                          </div>
+                        );
+                      })
                     ) : (
                       <p className="text-center text-black/60 py-8">
                         No comments yet
