@@ -1621,28 +1621,40 @@ export default function InstructorDashboard() {
               <TabsList className="bg-white shadow-md border-[#344F1F]/20 flex justify-center flex-wrap h-auto gap-3 p-3 rounded-lg">
                 <TabsTrigger
                   value="overview"
-                  className="text-sm sm:text-base data-[state=active]:bg-[#344F1F] data-[state=active]:text-[#F2EAD3] data-[state=active]:shadow-lg transition-all px-6 py-3"
+                  className="text-sm sm:text-base px-6 py-3 transition-all relative
+                    data-[state=active]:bg-[#344F1F] data-[state=active]:text-[#F2EAD3] data-[state=active]:shadow-lg
+                    hover:bg-[#344F1F]/80 hover:text-[#F2EAD3] hover:border-b-4 hover:border-[#F4991A]
+                    focus:outline-none focus:ring-2 focus:ring-[#F4991A]"
                 >
                   <BarChart3 className="h-5 w-5 sm:mr-2" />
                   <span className="hidden sm:inline">Overview</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="detailed"
-                  className="text-sm sm:text-base data-[state=active]:bg-[#344F1F] data-[state=active]:text-[#F2EAD3] data-[state=active]:shadow-lg transition-all px-6 py-3"
+                  className="text-sm sm:text-base px-6 py-3 transition-all relative
+                    data-[state=active]:bg-[#344F1F] data-[state=active]:text-[#F2EAD3] data-[state=active]:shadow-lg
+                    hover:bg-[#344F1F]/80 hover:text-[#F2EAD3] hover:border-b-4 hover:border-[#344F1F]
+                    focus:outline-none focus:ring-2 focus:ring-[#344F1F]"
                 >
                   <Award className="h-5 w-5 sm:mr-2" />
                   <span className="hidden sm:inline">Detailed Ratings</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="comments"
-                  className="text-sm sm:text-base data-[state=active]:bg-[#344F1F] data-[state=active]:text-[#F2EAD3] data-[state=active]:shadow-lg transition-all px-6 py-3"
+                  className="text-sm sm:text-base px-6 py-3 transition-all relative
+                    data-[state=active]:bg-[#344F1F] data-[state=active]:text-[#F2EAD3] data-[state=active]:shadow-lg
+                    hover:bg-[#344F1F]/80 hover:text-[#F2EAD3] hover:border-b-4 hover:border-[#5a7f3a]
+                    focus:outline-none focus:ring-2 focus:ring-[#5a7f3a]"
                 >
                   <MessageSquare className="h-5 w-5 sm:mr-2" />
                   <span className="hidden sm:inline">Student Feedback</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="ai"
-                  className="text-sm sm:text-base data-[state=active]:bg-[#344F1F] data-[state=active]:text-[#F2EAD3] data-[state=active]:shadow-lg transition-all px-6 py-3"
+                  className="text-sm sm:text-base px-6 py-3 transition-all relative
+                    data-[state=active]:bg-[#344F1F] data-[state=active]:text-[#F2EAD3] data-[state=active]:shadow-lg
+                    hover:bg-[#344F1F]/80 hover:text-[#F2EAD3] hover:border-b-4 hover:border-[#F4991A]
+                    focus:outline-none focus:ring-2 focus:ring-[#F4991A]"
                 >
                   <Brain className="h-5 w-5 sm:mr-2" />
                   <span className="hidden sm:inline">AI Analysis</span>
@@ -1653,7 +1665,7 @@ export default function InstructorDashboard() {
               <TabsContent value="overview" className="space-y-6">
                 <Card className="border-none shadow-lg bg-white">
                   <CardHeader>
-                    <CardTitle className="text-[#344F1F] text-2xl">
+                    <CardTitle className="text-[#344F1F] text-2xl font-bold">
                       Category Performance
                     </CardTitle>
                     <CardDescription>
@@ -1747,7 +1759,7 @@ export default function InstructorDashboard() {
               <TabsContent value="detailed" className="space-y-6">
                 <Card className="border-none shadow-lg bg-white">
                   <CardHeader>
-                    <CardTitle className="text-[#344F1F] text-2xl">
+                    <CardTitle className="text-[#344F1F] text-2xl font-bold">
                       Detailed Question Ratings
                     </CardTitle>
                     <CardDescription>
